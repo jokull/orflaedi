@@ -1,0 +1,39 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+#hamburger-dropdown {
+  text-align: right;
+}
+
+.nav-btn {
+  @apply block my-4 text-teal-200;
+}
+
+.nav-btn:hover {
+  @apply text-white;
+}
+
+@screen sm {
+  .nav-btn {
+    @apply inline-block my-0 text-left mr-4;
+  }
+}
+
+#hamburger-dropdown {
+  position: absolute;
+  right: 0;
+  top: 78px;
+}
+
+@screen sm {
+  #hamburger-dropdown {
+    position: inherit;
+  }
+}
+
+.pill {
+  @apply inline-block bg-gray-200 rounded-full px-3 py-1 text-sm font-semibold text-gray-700;
+}
+
+@import "./app.css";

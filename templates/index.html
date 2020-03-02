@@ -1,0 +1,26 @@
+{% extends "base.html" %} {% block body %}
+<div
+  class="bikes grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:p-6 mx-auto max-w-6xl"
+>
+  {% for model in models %}
+  <div class="max-w-sm mx-auto rounded overflow-hidden shadow-lg sm:mb-1">
+    <img
+      class="w-full object-cover object-bottom h-52"
+      src="{{ model.image_url }}"
+      alt="Sunset in the mountains"
+    />
+    <div class="px-6 py-4">
+      <div class="font-bold text-xl mb-2">{{ model.name }}</div>
+      <p class="text-gray-700 text-base">
+        {{ "{0:,g}".format(model.price).replace(",", ".") }} kr
+      </p>
+    </div>
+    <div class="px-6 py-4">
+      <span class="pill mr-2">{{ model.make }}</span>
+      <span class="pill mr-2">{{ model.retailer.name }}</span>
+      <span class="pill">{{ model.classification.value['long'] }}</span>
+    </div>
+  </div>
+  {% endfor %}
+</div>
+{% endblock body %}

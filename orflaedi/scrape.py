@@ -1,0 +1,2 @@
+def scrape():
+    return

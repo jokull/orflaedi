@@ -40,5 +40,10 @@ templates = Jinja2Templates(directory="templates")
 
 @app.get("/")
 async def index(request: Request, db: Session = Depends(get_db)):
-    models_ = db.query(models.Model).filter(models.Model.active == True).all()
+    models_ = (
+        db.query(models.Model)
+        .filter(models.Model.active == True)
+        .order_by(models.Model.created.desc())
+        .all()
+    )
     return templates.TemplateResponse("index.html", {"request": request, "models": models_})

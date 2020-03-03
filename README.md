@@ -29,18 +29,17 @@ Use something like this for black formating in a `.vscode/settings.json` file.
 
 This project scrapes Icelandic e-bike retailer websites
 
-- tri.is
-- kriacycles.is
 - ellingsen.s4s.is
-- rafmagnshjol.is
 - orninn.is
+- kriacycles.is
+- tri.is
+- rafmagnshjol.is
 - reidhjolaverzlunin.is
 - markid.is
 - gap.is
-- hjolasprettur.is
-- bike.is (Fjallakofinn)
-- peleton.is
-- hvellur.com
+- peloton.is
 - ofsi.is
-- skidathjonustan.com
+- hjolasprettur.is
+- hvellur.com
+- bike.is (Fjallakofinn)
 - everest.is

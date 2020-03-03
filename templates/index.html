@@ -3,22 +3,29 @@
   class="bikes grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:p-6 mx-auto max-w-6xl"
 >
   {% for model in models %}
-  <div class="max-w-sm mx-auto rounded overflow-hidden shadow-lg sm:mb-1">
+  <div class="mx-auto rounded overflow-hidden shadow-lg sm:mb-1">
     <img
-      class="w-full object-cover object-bottom h-52"
+      class="w-full bg-white object-cover object-bottom h-48"
       src="{{ model.image_url }}"
-      alt="Sunset in the mountains"
+      alt="Image of {{ model.name }}"
     />
-    <div class="px-6 py-4">
+    <div class="px-4 py-4">
+      <div class="font-bold uppercase text-gray-500 text-sm tracking-wider">
+        {{ model.make }}
+      </div>
       <div class="font-bold text-xl mb-2">{{ model.name }}</div>
       <p class="text-gray-700 text-base">
-        {{ "{0:,g}".format(model.price).replace(",", ".") }} kr
+        {% if model.price %}
+        {{ "{:,.0f}".format(model.price).replace(",", ".") }} kr
+        {% else %}
+        - kr
+        {% endif %}
       </p>
     </div>
-    <div class="px-6 py-4">
-      <span class="pill mr-2">{{ model.make }}</span>
-      <span class="pill mr-2">{{ model.retailer.name }}</span>
-      <span class="pill">{{ model.classification.value['long'] }}</span>
+    <div class="px-4 pb-4 pt-2">
+      <div class="pill mt-2 mr-px">250w</div>
+      <div class="pill mt-2 mr-px">{{ model.retailer.name }}</div>
+      <div class="pill mt-2">{{ model.classification.value['long'] }}</div>
     </div>
   </div>
   {% endfor %}

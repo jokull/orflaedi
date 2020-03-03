@@ -1,6 +1,4 @@
 import enum
-import decimal
-from collections import namedtuple
 
 from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Enum, func
 from sqlalchemy.orm import relationship
@@ -11,8 +9,8 @@ from .database import Base
 class VehicleClassEnum(enum.Enum):
     bike_b = {"short": "bike_b", "long": "Reiðhjól B"}
     bike_c = {"short": "bike_c", "long": "Reiðhjól C"}
-    lb_1 = {"short": "lb_1", "long": "Létt bifhjól 1"}
-    lb_2 = {"short": "lb_2", "long": "Létt bifhjól 2"}
+    lb_1 = {"short": "lb_1", "long": "Létt bifhjól"}
+    lb_2 = {"short": "lb_2", "long": "Hraðhjól"}
 
 
 class Retailer(Base):
@@ -46,3 +44,4 @@ class Model(Base):
     image_url = Column(String, nullable=True)
     sku = Column(String)
     last_scraped = Column(DateTime)
+    scrape_url = Column(String)

@@ -36,4 +36,5 @@ class EllingsenSpider(scrapy.Spider):
             "name": response.css(".information>.product-name::text").get(),
             "price": price,
             "file_urls": file_urls,
+            "scrape_url": response.url,
         }

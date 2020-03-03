@@ -1,19 +1,21 @@
-{% extends "base.html" %} {% block body %}
+{% extends "base.html" %}
+
+{% block body %}
 <div
-  class="bikes grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:p-6 mx-auto max-w-6xl"
+  class="bikes grid grid-cols-1 gap-4 sm:p-6 mx-auto max-w-6xl"
 >
   {% for model in models %}
-  <div class="mx-auto rounded overflow-hidden shadow-lg sm:mb-1">
+  <a href="{{ url_for('get_model', id=model.id) }}" class="rounded overflow-hidden shadow-lg sm:mb-1">
     <img
-      class="w-full bg-white object-cover object-bottom h-48"
-      src="{{ model.image_url }}"
+      class="w-full bg-white object-contain object-bottom h-64 sm:h-48 p-1"
+      src="{{ imgix_url(model.image_url, dict(trim='color', auto='compress', max_w='400')) }}"
       alt="Image of {{ model.name }}"
     />
     <div class="px-4 py-4">
       <div class="font-bold uppercase text-gray-500 text-sm tracking-wider">
         {{ model.make }}
       </div>
-      <div class="font-bold text-xl mb-2">{{ model.name }}</div>
+      <div class="name font-bold text-xl mb-2">{{ model.name }}</div>
       <p class="text-gray-700 text-base">
         {% if model.price %}
         {{ "{:,.0f}".format(model.price).replace(",", ".") }} kr
@@ -22,12 +24,11 @@
         {% endif %}
       </p>
     </div>
-    <div class="px-4 pb-4 pt-2">
-      <div class="pill mt-2 mr-px">250w</div>
-      <div class="pill mt-2 mr-px">{{ model.retailer.name }}</div>
+    <div class="p-4 pt-0">
+      <div class="pill mt-2 mr-px retailer-{{ model.retailer.slug }}">{{ model.retailer.name }}</div>
       <div class="pill mt-2">{{ model.classification.value['long'] }}</div>
     </div>
-  </div>
+  </a>
   {% endfor %}
 </div>
 {% endblock body %}

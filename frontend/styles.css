@@ -32,12 +32,38 @@
   }
 }
 
-.bikes img {
-  min-width: ;
+@screen sm {
+  .bikes {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@screen md {
+  .bikes {
+    grid-template-columns: repeat(3, 1fr);
+  }
+}
+
+@screen lg {
+  .bikes {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+
+.bikes .name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .pill {
   @apply inline-block bg-gray-200 rounded-full px-3 py-1 text-xs font-semibold text-gray-700;
+}
+
+.retailer-ellingsen {
+  background: #30b3dd;
+  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.8);
+  color: white;
 }
 
 @import "./app.css";

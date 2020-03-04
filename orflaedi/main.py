@@ -60,23 +60,24 @@ def get_classification_counts(db):
     }
 
 
-def get_retailer_counts(db):
+def get_retailer_counts(db, models_):
+    sq = models_.subquery()
     return (
-        db.query(models.Retailer, func.count(models.Model.id))
-        .join(models.Model)
+        db.query(models.Retailer, func.count(sq.c.id))
+        .join(sq, models.Retailer.id == sq.c.retailer_id)
         .group_by(models.Retailer.id)
         .order_by(models.Retailer.name)
     )
 
 
-def get_price_range_counts(db):
+def get_price_range_counts(db, models_):
     for i, (price_min, price_max) in enumerate(price_ranges):
-        q = db.query(func.count(models.Model.id))
+        q = models_
         if price_min is not None:
             q = q.filter(models.Model.price >= price_min)
         if price_max is not None:
             q = q.filter(models.Model.price <= price_max)
-        yield i, (price_min, price_max), q.scalar()
+        yield i, (price_min, price_max), q.count()
 
 
 # An inclusive range of integers for user friendly price categories
@@ -104,6 +105,12 @@ async def get_index(
         if vclass is not None:
             models_ = models_.filter(models.Model.classification == vclass)
 
+    retailer_counts = get_retailer_counts(db, models_)
+    price_range_counts = get_price_range_counts(db, models_)
+
+    if verslun is not None:
+        models_ = models_.join(models.Retailer).filter(models.Retailer.slug == verslun)
+
     if verdbil is not None:
         try:
             price_min, price_max = price_ranges[verdbil]
@@ -115,16 +122,13 @@ async def get_index(
             if price_max is not None:
                 models_ = models_.filter(models.Model.price <= price_max)
 
-    if verslun is not None:
-        models_ = models_.join(models.Retailer).filter(models.Retailer.slug == verslun)
-
     return templates.TemplateResponse(
         "index.html",
         {
             "request": request,
             "classification_counts": get_classification_counts(db),
-            "retailer_counts": get_retailer_counts(db),
-            "price_range_counts": get_price_range_counts(db),
+            "retailer_counts": retailer_counts,
+            "price_range_counts": price_range_counts,
             "models": models_.order_by(models.Model.price),
         },
     )

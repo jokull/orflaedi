@@ -45,11 +45,13 @@ nav .selected {
   position: absolute;
   right: 0;
   top: 78px;
+  box-shadow: 0 15px 10px rgba(0, 0, 0, 0.3);
 }
 
 @screen sm {
   #hamburger-dropdown {
     position: inherit;
+    box-shadow: none;
   }
 }
 
@@ -177,7 +179,7 @@ nav .selected {
   transform: rotate(180deg);
 }
 
-@screen md {
+@screen sm {
   .picker button img {
     display: none;
   }

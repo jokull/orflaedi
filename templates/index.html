@@ -1,13 +1,13 @@
 {% extends "base.html" %}
 
 {% block body %}
-<div class="mx-auto max-w-6xl sm:p-6">
+<div class="sm:px-6">
   {% if not request.query_params.keys() %}
-  <div class="welcome my-6 px-4 sm:px-0 sm:mt-8 sm:mb-20">
+  <div class="welcome my-6 px-4 sm:px-0 sm:mt-8 sm:mb-10">
     <h1 class="font-black text-3xl lg:text-4xl">
       Öll létt rafknúnin farartæki á Íslandi á einum stað
     </h1>
-    <div class="text-right text-xm text-gray-500">*a.m.k. vel flest</div>
+    <div class="text-right text-xm text-gray-500">*frá helstu söluaðilum – engin ábyrgð tekin á verðum og upplýsingum sem hér koma fram</div>
   </div>
   {% endif %}
   {% with flokkur = request.query_params.get('flokkur') %}
@@ -28,10 +28,10 @@
     <div class="picker picker-price_ranges {{ 'expanded' if request.query_params.get('verdbil') }}">
       <button class="block title">Verðbil <img src="{{ url_for('static', path='chevron.down.circle.svg') }}" class="inline h-4 ml-2"></button>
       <ul>
-      {% for num, price_range, count in price_range_counts %}
+      {% for num, price_range, count in price_range_counts if count %}
         <li>
           <a href="{{ url_for('get_index') }}?verdbil={{ num }}{{ '&{}={}'.format('flokkur', flokkur) if flokkur }}">
-            <span class="{{ 'selected' if request.query_params.get('verdbil') == num }}">
+            <span class="{{ 'selected' if request.query_params.get('verdbil') == '{}'.format(num) }}">
               {{ ({ 0: 'Undir 60.000 kr', 1: '60 - 130.000 kr', 2: '130 - 250.000 kr', 3: '250 - 600.000 kr', 4: 'Yfir 600.000 kr' })[num] }}
             </span>
             <span class="pill ml-2">{{ count }}</span>
@@ -43,7 +43,7 @@
   </div>
   {% endwith %}
   <div class="my-6 px-4 sm:px-0 mt-4 sm:mt-8">
-    <div class="text-xs text-right text-gray-500">{{ models.count() }} hjól</div>
+    <div class="text-xs text-right text-gray-500">{{ models.count() }} hjól — Verð ↑</div>
   </div>
   <div class="bikes grid grid-cols-1 gap-4">
     {% for model in models %}
@@ -53,7 +53,7 @@
       class="rounded overflow-hidden shadow-lg sm:mb-1"
     >
       <img
-        class="w-full bg-white object-contain object-bottom h-64 sm:h-40 p-1"
+        class="w-full bg-white object-contain h-64 sm:h-40 p-1"
         src="{{ imgix_url(model.image_url, dict(trim='color', auto='compress', max_w='400')) }}"
         alt="Image of {{ model.name }}"
       />

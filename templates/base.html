@@ -2,15 +2,22 @@
 <html lang="is">
   <head>
     <meta charset="utf-8" />
-    <title>Örflæði</title>
+    <title>Örflæði: Öll rafhjól og hlaupahjól á einum stað</title>
     <link
       href="{{ url_for('static', path='/dist/styles.css') }}"
       rel="stylesheet"
     />
+    <link rel="icon" href="{{ url_for('static', path='/favicon.png') }}" sizes="32x32">
+    <link rel="icon" href="{{ url_for('static', path='/favicon.png') }}" sizes="192x192">
+    <meta property="og:title" content="Örflæði.is" />
+    <meta property="og:description" content="Gagnagrunnur með öllum rafhjól, hlaupahjólum og öðrum léttum rafknúnum farartækjum frá helstu söluaðilum." />
+    <meta property="og:type" content="website" />
+    <meta property="og:url" content="https://www.orflaedi.is/" />
+    <meta property="og:image" content="https://www.orflaedi.is{{ url_for('static', path='/opengraph.png') }}" />
   </head>
 
-  <body class="bg-gray-100">
-    <div class="mx-auto">
+  <body class="bg-gray-100 flex flex-col flex-wrap items-center min-h-screen">
+    <div class="w-full">
       <nav
         id="navigation"
         class="flex items-center justify-between flex-wrap p-6 max-w-6xl mx-auto"
@@ -35,7 +42,7 @@
         </div>
         <div
           id="hamburger-dropdown"
-          class="flex-grow bg-white shadow sm:shadow-none sm:bg-transparent w-full hidden sm:block sm:flex sm:items-center sm:w-auto p-6 sm:p-0"
+          class="flex-grow bg-gray-100 shadow sm:shadow-none sm:bg-transparent w-full hidden sm:block sm:flex sm:items-center sm:w-auto p-6 sm:p-0"
         >
           <div class="text-sm sm:flex-grow">
             <a 
@@ -67,9 +74,20 @@
           </div>
         </div>
       </nav>
-      {% block body %}{% endblock body %}
-      <script src="{{ url_for('static', path='/dist/app.js') }}"></script>
     </div>
+    <div class="flex-grow w-full">
+      <div class="max-w-6xl mx-auto">
+      {% block body %}{% endblock body %}
+      </div>
+    </div>
+    <footer class="bg-gray-900 w-full mt-8">
+      <div class="mx-auto max-w-6xl px-4 py-8 sm:px-6 text-xs sm:text-sm">
+        <p class="my-1 text-gray-600">Vefsíðan notar Scrapy til að safna upplýsingum frá vefsíðum verslana</p>
+        <p class="my-1 text-gray-600">Þessi vefsíða notar ekki cookies og safnar engum persónugögnum</p>
+        <p class="my-1 text-gray-600"><a href="mailto:jokull@solberg.is" class="font-bold text-gray-500">jokull@solberg.is</a></p>
+      </div>
+    </footer>
     {% include "fathom.html" %}
+    <script src="{{ url_for('static', path='/dist/app.js') }}"></script>
   </body>
 </html>

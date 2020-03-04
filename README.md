@@ -59,6 +59,9 @@ Vehicles can be browsed on these dimensions
   - Hraðhjól (also called Létt bifhjól 2, light two wheeler above 25km/h top speed)
 - Retailer
   - see websites above
-- Brand
 
 In the future it would be good to connect vehicles to electribikereview.com to get frame types, purpose (gravel, city, cargo etc.).
+
+# Deployment
+
+The project is hosted on Render on `www.orflaedi.is`. There is a Scrap spider for each of the retailer websites that is run a few times a day.

@@ -8,12 +8,11 @@
   "license": "ISC",
   "scripts": {
     "clean": "rm -rf static/dist/",
+    "build": "parcel frontend/app.ts frontend/styles.css --out-dir static/dist/ --public-url /static/dist/",
     "watch": "parcel watch frontend/app.ts frontend/styles.css --out-dir static/dist/ --public-url /static/dist/"
   },
   "dependencies": {},
   "devDependencies": {
-    "@types/react": "^16.9.23",
-    "@types/react-dom": "^16.9.5",
     "autoprefixer": "^9.7.4",
     "parcel-bundler": "^1.12.4",
     "prettier": "^1.19.1",

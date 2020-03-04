@@ -7,13 +7,10 @@
   "author": "",
   "license": "ISC",
   "scripts": {
-    "clean": "rm static/styles.* static/app.js*",
-    "watch": "parcel watch frontend/app.ts frontend/styles.css --out-dir static/ --public-url /static/"
+    "clean": "rm -rf static/dist/",
+    "watch": "parcel watch frontend/app.ts frontend/styles.css --out-dir static/dist/ --public-url /static/dist/"
   },
-  "dependencies": {
-    "react": "^16.13.0",
-    "react-dom": "^16.13.0"
-  },
+  "dependencies": {},
   "devDependencies": {
     "@types/react": "^16.9.23",
     "@types/react-dom": "^16.9.5",

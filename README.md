@@ -43,3 +43,22 @@ This project scrapes Icelandic e-bike retailer websites
 - hvellur.com
 - bike.is (Fjallakofinn)
 - everest.is
+
+Vehicles can be browsed on these dimensions
+
+- Price
+  - Below 60.000 kr
+  - Between 60.000 and 130.000 kr
+  - Between 130.000 and 250.000 kr
+  - Between 250.000 and 600.000 kr
+  - Above 600.000 kr
+- Vehicle classification
+  - Reiðhjól C (mostly scooters)
+  - Reiðhjól B (e-bikes)
+  - Létt bifhjól (light two wheeler above 250w)
+  - Hraðhjól (also called Létt bifhjól 2, light two wheeler above 25km/h top speed)
+- Retailer
+  - see websites above
+- Brand
+
+In the future it would be good to connect vehicles to electribikereview.com to get frame types, purpose (gravel, city, cargo etc.).

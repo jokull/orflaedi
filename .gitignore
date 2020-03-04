@@ -15,5 +15,5 @@ poetry.lock
 
 # Project
 .cache
-static/*
+static/dist
 .env

@@ -1,27 +1,3 @@
-import * as React from "react";
-import * as ReactDOM from "react-dom";
-
-const e = React.createElement;
-
-type LikeState = {
-  liked: boolean;
-};
-
-class LikeButton extends React.Component<LikeState> {
-  state: LikeState = {
-    liked: true
-  };
-  render() {
-    return e(
-      "button",
-      { onClick: () => this.setState({ liked: !this.state.liked }) },
-      (this.state.liked && "Örflæði") || "Hörflæði"
-    );
-  }
-}
-
-ReactDOM.render(e(LikeButton), document.querySelector("#title"));
-
 window.addEventListener("click", event => {
   if (
     !event.target.closest("#hamburger") &&
@@ -34,4 +10,11 @@ window.addEventListener("click", event => {
 document.querySelector("#hamburger").addEventListener("click", event => {
   const dropdownEl = document.querySelector("#hamburger-dropdown");
   dropdownEl.classList.toggle("hidden");
+});
+
+document.querySelectorAll(".picker").forEach(pickerEl => {
+  const buttonEl = pickerEl.querySelector(".title");
+  buttonEl.addEventListener("click", event => {
+    pickerEl.classList.toggle("expanded");
+  });
 });

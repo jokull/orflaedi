@@ -43,6 +43,7 @@ class DatabasePipeline(object):
             model.name = item["name"]
             model.make = item.get("make")
         model.last_scraped = dt.datetime.utcnow()
+        model.scrape_url = item["scrape_url"]
         model.price = item["price"]
         model.image_url = len(item["file_urls"]) and item["file_urls"][0] or None
         model.active = True
@@ -52,6 +53,10 @@ class DatabasePipeline(object):
             model.make = item.get("make") or ""
         if not model.motor_model:
             model.motor_model = item.get("motor_model") or None
+        if model.name and model.make:
+            if model.name.startswith(model.make):
+                model.name = model.name[len(model.make) :]
+        model.name = model.name.strip()
         self.db.add(model)
         self.scraped_skus.add(item["sku"])
         return item

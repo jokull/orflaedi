@@ -3,63 +3,73 @@
   <head>
     <meta charset="utf-8" />
     <title>Örflæði</title>
-    <link href="{{ url_for('static', path='/styles.css') }}" rel="stylesheet" />
+    <link
+      href="{{ url_for('static', path='/dist/styles.css') }}"
+      rel="stylesheet"
+    />
   </head>
 
   <body class="bg-gray-100">
     <div class="mx-auto">
-      <div class="bg-teal-500">
-        <nav
-          id="navigation"
-          class="flex items-center justify-between flex-wrap p-6 max-w-6xl mx-auto"
-        >
-          <div class="flex items-center flex-shrink-0 text-white mr-6">
-            <span class="font-semibold text-xl tracking-tight"
-              ><span id="title">Örflæði</span></span
-            >
-          </div>
-          <div class="block sm:hidden">
-            <button
-              id="hamburger"
-              class="flex items-center pl-3 py-2 rounded text-teal-200 hover:text-white hover:border-white"
-            >
-              <svg
-                class="fill-current h-3 w-3"
-                viewBox="0 0 20 20"
-                xmlns="http://www.w3.org/2000/svg"
-              >
-                <title>Menu</title>
-                <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z" />
-              </svg>
-            </button>
-          </div>
-          <div
-            id="hamburger-dropdown"
-            class="bg-teal-500 w-full hidden sm:block flex-grow sm:flex sm:items-center sm:w-auto p-6 sm:p-0"
+      <nav
+        id="navigation"
+        class="flex items-center justify-between flex-wrap p-6 max-w-6xl mx-auto"
+      >
+        <a id="logo" href="/" class="mr-6 block" alt="Örflæði">
+          {% include "logo.svg" %}
+        </a>
+        <div class="block sm:hidden">
+          <button
+            id="hamburger"
+            class="flex items-center pl-3 py-2 rounded hover:text-gray-800 hover:border-gray-400"
           >
-            <div class="text-sm sm:flex-grow">
-              <a href="#" class="nav-btn">
-                Docs
-              </a>
-              <a href="#" class="nav-btn">
-                Examples
-              </a>
-              <a href="#" class="nav-btn">
-                Blog
-              </a>
-            </div>
-            <div>
-              <a
-                href="#"
-                class="inline-block text-sm px-4 py-2 leading-none border rounded text-white border-white hover:border-transparent hover:text-teal-500 hover:bg-white mt-4 sm:mt-0"
-                >Download</a
-              >
-            </div>
+            <svg
+              class="fill-current h-4 w-4"
+              viewBox="0 0 20 20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <title>Menu</title>
+              <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z" />
+            </svg>
+          </button>
+        </div>
+        <div
+          id="hamburger-dropdown"
+          class="flex-grow bg-white shadow sm:shadow-none sm:bg-transparent w-full hidden sm:block sm:flex sm:items-center sm:w-auto p-6 sm:p-0"
+        >
+          <div class="text-sm sm:flex-grow">
+            <a 
+              href="{{ url_for('get_index') }}?flokkur=bike_b" 
+              class="{{ 'selected' if request.query_params.get('flokkur') == 'bike_b' }} nav-btn"
+            >
+              Rafhjól <span class="ml-2 text-gray-500">{{ classification_counts['bike_b'] }}
+            </a>
+            <a 
+              href="{{ url_for('get_index') }}?flokkur=bike_c" 
+              class="{{ 'selected' if request.query_params.get('flokkur') == 'bike_c' }} nav-btn"
+            >
+              Rafskútur <span class="ml-2 text-gray-500">{{ classification_counts['bike_c'] }}
+            </a>
+            <a 
+              href="{{ url_for('get_index') }}?flokkur=lb_1" 
+              class="{{ 'selected' if request.query_params.get('flokkur') == 'lb_1' }} nav-btn"
+            >
+              Létt bifhjól <span class="ml-2 text-gray-500">{{ classification_counts['lb_1'] }}
+            </a>
           </div>
-        </nav>
-      </div>
+          <div>
+            <a
+              href="https://www.solberg.is/rafhjolaflokkar/"
+              target="_blank"
+              class="font-bold inline-block text-sm px-4 py-2 leading-none border rounded border-white hover:border-gray shadow bg-white mt-4 sm:mt-0"
+              >Um flokkana</a
+            >
+          </div>
+        </div>
+      </nav>
       {% block body %}{% endblock body %}
-      <script src="{{ url_for('static', path='/app.js') }}"></script>
+      <script src="{{ url_for('static', path='/dist/app.js') }}"></script>
     </div>
+    {% include "fathom.html" %}
   </body>
 </html>

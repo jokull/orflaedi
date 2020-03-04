@@ -19,7 +19,9 @@ class HvellurSpider(scrapy.Spider):
         image_url = response.css(".product-image-wrap a::attr('href')").get()
         price = int(
             "".join(
-                response.css(".entry-summary .price .woocommerce-Price-amount::text")[2].re(r"\d+")
+                response.css(".entry-summary .price .woocommerce-Price-amount::text")[
+                    2
+                ].re(r"\d+")
             )
         )
 
@@ -28,7 +30,6 @@ class HvellurSpider(scrapy.Spider):
             "name": name,
             "make": make,
             "price": price,
-            "motor_model": motor_model,
             "file_urls": [image_url],
             "scrape_url": response.url,
         }

@@ -43,6 +43,7 @@ This project scrapes Icelandic e-bike retailer websites
 - hvellur.com
 - bike.is (Fjallakofinn)
 - everest.is
+- nova.is
 
 Vehicles can be browsed on these dimensions
 

@@ -65,3 +65,5 @@ In the future it would be good to connect vehicles to electribikereview.com to g
 # Deployment
 
 The project is hosted on Render on `www.orflaedi.is`. There is a Scrap spider for each of the retailer websites that is run a few times a day.
+
+poetry export --without-hashes -f requirements.txt > requirements.txt

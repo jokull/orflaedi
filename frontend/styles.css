@@ -164,6 +164,10 @@ nav .selected {
 .picker button img {
   @apply rotate-180;
   transition: all 170ms cubic-bezier(0.4, 0, 1, 1);
+  /* these next two styles is to not render it on top of 
+     absolutely positioned elements (<nav> stuff specifically) */
+  transform-style: flat;
+  z-index: -1;
 }
 
 .picker ul {

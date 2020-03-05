@@ -62,7 +62,7 @@
               href="{{ url_for('get_index') }}?flokkur=lb_1" 
               class="{{ 'selected' if request.query_params.get('flokkur') == 'lb_1' }} nav-btn"
             >
-              Létt bifhjól <span class="ml-2 text-gray-500">{{ classification_counts['lb_1'] }}
+              Létt bifhjól <span class="ml-2 text-gray-500">{{ classification_counts['lb_1'] + classification_counts['lb_2'] }}
             </a>
           </div>
           <div>

@@ -89,6 +89,8 @@ price_ranges = (
     (600_000, None),
 )
 
+lett_bifhjol_classes = (models.VehicleClassEnum.lb_1, models.VehicleClassEnum.lb_2)
+
 
 @app.get("/")
 async def get_index(
@@ -103,7 +105,12 @@ async def get_index(
     if flokkur is not None:
         vclass = getattr(models.VehicleClassEnum, flokkur)
         if vclass is not None:
-            models_ = models_.filter(models.Model.classification == vclass)
+            if vclass in lett_bifhjol_classes:
+                models_ = models_.filter(
+                    models.Model.classification.in_(lett_bifhjol_classes)
+                )
+            else:
+                models_ = models_.filter(models.Model.classification == vclass)
 
     retailer_counts = get_retailer_counts(db, models_)
     price_range_counts = get_price_range_counts(db, models_)

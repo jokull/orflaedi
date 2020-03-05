@@ -1,6 +1,15 @@
 import enum
 
-from sqlalchemy import Boolean, Column, ForeignKey, Integer, String, DateTime, Enum, func
+from sqlalchemy import (
+    Boolean,
+    Column,
+    ForeignKey,
+    Integer,
+    String,
+    DateTime,
+    Enum,
+    func,
+)
 from sqlalchemy.orm import relationship
 
 from .database import Base
@@ -10,7 +19,7 @@ class VehicleClassEnum(enum.Enum):
     bike_b = {"short": "bike_b", "long": "Reiðhjól B"}
     bike_c = {"short": "bike_c", "long": "Reiðhjól C"}
     lb_1 = {"short": "lb_1", "long": "Létt bifhjól"}
-    lb_2 = {"short": "lb_2", "long": "Hraðhjól"}
+    lb_2 = {"short": "lb_2", "long": "Hraðhjól 45km/klst"}
 
 
 class Retailer(Base):

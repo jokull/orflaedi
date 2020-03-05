@@ -9,7 +9,7 @@ class KriaSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        for link in response.css(".products a.product-title::attr(href)"):
+        for link in response.css(".products a.product-title"):
             yield response.follow(link, self.parse_product)
         for link in response.xpath("//a[@title='layout.pagination.next_html']"):
             yield response.follow(link, self.parse)
@@ -17,14 +17,13 @@ class KriaSpider(scrapy.Spider):
     def parse_product(self, response):
 
         price = int("".join(response.css("#ProductPrice::text").re(r"\d+")))
-
         image_url = response.css("#ProductPhoto img::attr(src)").get()
-        sku = image_url.split("/")[-1].split("-")[0]
+        sku = response.xpath("//meta[@property='og:url']").css("::attr(content)").get()
 
         yield {
             "sku": sku,
             "name": response.css(".product-title h1::text").get(),
-            "make": response.xpath("//meta[@name='twitter:data2']/@content").get(),
+            "make": "Specialized",
             "price": price,
             "file_urls": [image_url],
             "scrape_url": response.url,

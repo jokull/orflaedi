@@ -45,6 +45,13 @@ This project scrapes Icelandic e-bike retailer websites
 - everest.is
 - nova.is
 
+_TODO_
+
+- http://www.gastec.is/vorur/p/TA8z9YCkyT/wQpl8dtKLw/sidney/
+- https://www.pukinn.com/ghost-e-bikes
+
+## Data
+
 Vehicles can be browsed on these dimensions
 
 - Price
@@ -63,11 +70,12 @@ Vehicles can be browsed on these dimensions
   - see websites above
 
 In the future it would be good to connect vehicles to electribikereview.com to
-get frame types, purpose (gravel, city, cargo etc.).
+get frame types, purpose (gravel, city, cargo etc.). I scraped the bike brand
+name too. Could add a filter for that to the UI.
 
 # Deployment
 
-The project is hosted on Render on `www.orflaedi.is`. There is a Scrap spider
+The project is hosted on Render on `www.orflaedi.is`. There is a Scrapy spider
 for each of the retailer websites that is run a few times a day.
 
 ```bash

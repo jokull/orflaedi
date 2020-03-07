@@ -10,7 +10,6 @@ from starlette.templating import Jinja2Templates
 
 from . import models
 from .database import SessionLocal, engine
-from .scrape import scrape
 
 models.Base.metadata.create_all(bind=engine)
 
@@ -24,16 +23,6 @@ def get_db():
         yield db
     finally:
         db.close()
-
-
-@app.get("/scrape")
-def get_scrape(db: Session = Depends(get_db)):
-    scraped = []
-    """
-    for name, status in scrape(db):
-        scraped.append([name, status])
-    """
-    return {"scraped": scraped}
 
 
 app.mount("/static", StaticFiles(directory="static"), name="static")

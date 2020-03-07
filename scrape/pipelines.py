@@ -1,9 +1,13 @@
+import os
 import datetime as dt
+
+from sqlalchemy import create_engine
+from sqlalchemy.orm import sessionmaker
+
+from scrapy.utils.project import get_project_settings
+
 from orflaedi.database import SessionLocal, engine
 from orflaedi.models import Base, Model, Retailer
-
-
-Base.metadata.create_all(bind=engine)
 
 
 def get_or_create_retailer(db, slug):
@@ -15,11 +19,23 @@ def get_or_create_retailer(db, slug):
     return retailer
 
 
+def get_connection_string():
+    database_url = get_project_settings().get("DATABASE_URL")
+    if database_url is not None:
+        return database_url
+    return os.environ.get("DATABASE_URL", "postgresql://orflaedi:@localhost/orflaedi")
+
+
 class DatabasePipeline(object):
     def __init__(self):
         self.scraped_skus = set()
 
     def open_spider(self, spider):
+        connection_string = spider.settings.get("DATABASE_URL")
+        if connection_string is None:
+            connection_string = get_connection_string()
+        engine = create_engine(connection_string, connect_args={})
+        SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
         self.db = SessionLocal()
         self.retailer = get_or_create_retailer(self.db, slug=spider.name)
 

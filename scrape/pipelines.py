@@ -74,5 +74,6 @@ class DatabasePipeline(object):
                 model.name = model.name[len(model.make) :]
         model.name = model.name.strip()
         self.db.add(model)
+        self.db.commit()
         self.scraped_skus.add(item["sku"])
         return item

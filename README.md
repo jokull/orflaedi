@@ -44,10 +44,10 @@ This project scrapes Icelandic e-bike retailer websites
 - bike.is (Fjallakofinn)
 - everest.is
 - nova.is
+- skidathjonustan.com (Akureyri)
 
 _TODO_
 
-- http://www.skidathjonustan.com/434026228
 - https://arcticebike.com/collections/e-bikes
 - http://www.gastec.is/vorur/p/TA8z9YCkyT/wQpl8dtKLw/sidney/
 - https://www.pukinn.com/ghost-e-bikes

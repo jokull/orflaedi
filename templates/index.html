@@ -82,10 +82,10 @@
     >
       <img
         class="w-full bg-white object-contain h-64 sm:h-40 p-1 lazyload"
-        data-src="{{ imgix_url(model.image_url, dict(trim='color', auto='format,compress', max_w='400')) }}"
-        data-srcset="{{ imgix_url(model.image_url, dict(trim='color', auto='format,compress', max_w='400')) }} 1x,
-                     {{ imgix_url(model.image_url, dict(trim='color', auto='format,compress', max_w='400', dpr='2')) }} 2x,
-                     {{ imgix_url(model.image_url, dict(trim='color', auto='format,compress', max_w='400', dpr='3')) }} 3x"
+        data-src="{{ imgix_url(model.image_url, {'trim':'color', 'trim-tol': '20', 'auto':'format,compress', 'max_w':'400'}) }}"
+        data-srcset="{{ imgix_url(model.image_url, {'trim':'color', 'trim-tol': '20', 'auto':'format,compress', 'max_w':'400'}) }} 1x,
+                     {{ imgix_url(model.image_url, {'trim':'color', 'trim-tol': '20', 'auto':'format,compress', 'max_w':'400', 'dpr': '2'}) }} 2x,
+                     {{ imgix_url(model.image_url, {'trim':'color', 'trim-tol': '20', 'auto':'format,compress', 'max_w':'400', 'dpr': '3'}) }} 3x"
         alt="Image of {{ model.name }}"
       />
       <div class="px-4 py-4">

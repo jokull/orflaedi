@@ -1,49 +1,77 @@
-{% extends "base.html" %}
-
-{% block body %}
+{% extends "base.html" %} {% block body %}
 <div class="sm:px-6">
   {% if not request.query_params.keys() %}
   <div class="welcome my-6 px-4 sm:px-0 sm:mt-8 sm:mb-10">
     <h1 class="font-black text-3xl lg:text-4xl">
       Rafhjól að þínu skapi frá helstu söluaðilum í einum grunni
     </h1>
-    <div class="text-right text-xm text-gray-500">*engin ábyrgð tekin á verðum og upplýsingum sem hér koma fram</div>
+    <div class="text-right text-xm text-gray-500">
+      *engin ábyrgð tekin á verðum og upplýsingum sem hér koma fram
+    </div>
   </div>
-  {% endif %}
-  {% with flokkur = request.query_params.get('flokkur') %}
+  {% endif %} {% with flokkur = request.query_params.get('flokkur') %}
   <div class="pickers mb-4">
-    <div class="picker picker-retailers {{ 'expanded' if request.query_params.get('verslun') }}">
-      <button class="block title">Verslun <img src="{{ url_for('static', path='chevron.down.circle.svg') }}" class="inline h-4 ml-2"></button>
+    <div
+      class="picker picker-retailers {{ 'expanded' if request.query_params.get('verslun') }}"
+    >
+      <button class="block title">
+        Verslun
+        <img
+          src="{{ url_for('static', path='chevron.down.circle.svg') }}"
+          class="inline h-4 ml-2"
+        />
+      </button>
       <ul>
-      {% for retailer, count in retailer_counts %}
+        {% for retailer, count in retailer_counts %}
         <li>
-          <a href="{{ url_for('get_index') }}?verslun={{ retailer.slug }}{{ '&{}={}'.format('flokkur', flokkur) if flokkur }}">
-            <span class="{{ 'selected' if request.query_params.get('verslun') == retailer.slug }} name">{{ retailer.name }}</span>
+          <a
+            href="{{ url_for('get_index') }}?verslun={{ retailer.slug }}{{ '&{}={}'.format('flokkur', flokkur) if flokkur }}"
+          >
+            <span
+              class="{{ 'selected' if request.query_params.get('verslun') == retailer.slug }} name"
+              >{{ retailer.name }}</span
+            >
             <span class="pill ml-2">{{ count }}</span>
           </a>
         </li>
-      {% endfor %}
+        {% endfor %}
       </ul>
     </div>
-    <div class="picker picker-price_ranges {{ 'expanded' if request.query_params.get('verdbil') }}">
-      <button class="block title">Verðbil <img src="{{ url_for('static', path='chevron.down.circle.svg') }}" class="inline h-4 ml-2"></button>
+    <div
+      class="picker picker-price_ranges {{ 'expanded' if request.query_params.get('verdbil') }}"
+    >
+      <button class="block title">
+        Verðbil
+        <img
+          src="{{ url_for('static', path='chevron.down.circle.svg') }}"
+          class="inline h-4 ml-2"
+        />
+      </button>
       <ul>
-      {% for num, price_range, count in price_range_counts if count %}
+        {% for num, price_range, count in price_range_counts if count %}
         <li>
-          <a href="{{ url_for('get_index') }}?verdbil={{ num }}{{ '&{}={}'.format('flokkur', flokkur) if flokkur }}">
-            <span class="{{ 'selected' if request.query_params.get('verdbil') == '{}'.format(num) }}">
-              {{ ({ 0: 'Undir 60.000 kr', 1: '60 - 130.000 kr', 2: '130 - 250.000 kr', 3: '250 - 600.000 kr', 4: 'Yfir 600.000 kr' })[num] }}
+          <a
+            href="{{ url_for('get_index') }}?verdbil={{ num }}{{ '&{}={}'.format('flokkur', flokkur) if flokkur }}"
+          >
+            <span
+              class="{{ 'selected' if request.query_params.get('verdbil') == '{}'.format(num) }}"
+            >
+              {{ ({ 0: 'Undir 60.000 kr', 1: '60 - 130.000 kr', 2: '130 -
+              250.000 kr', 3: '250 - 600.000 kr', 4: 'Yfir 600.000 kr' })[num]
+              }}
             </span>
             <span class="pill ml-2">{{ count }}</span>
           </a>
         </li>
-      {% endfor %}
+        {% endfor %}
       </ul>
     </div>
   </div>
   {% endwith %}
   <div class="my-6 px-4 sm:px-0 mt-4 sm:mt-8">
-    <div class="text-xs text-right text-gray-500">{{ models.count() }} hjól — Verð ↑</div>
+    <div class="text-xs text-right text-gray-500">
+      {{ models.count() }} hjól — Verð ↑
+    </div>
   </div>
   <div class="bikes grid grid-cols-1 gap-4">
     {% for model in models %}
@@ -64,7 +92,9 @@
         <div class="font-bold uppercase text-gray-600 text-xs tracking-wider">
           {{ model.make }}
         </div>
-        <div class="name font-bold text-xl mb-1">{{ model.name }}</div>
+        <div title="{{ model.name }}" class="name font-bold text-xl mb-1">
+          {{ model.name }}
+        </div>
         <p class="text-gray-700 text-base">
           {% if model.price %} {{ "{:,.0f}".format(model.price).replace(",",
           ".") }} kr {% else %} - kr {% endif %}

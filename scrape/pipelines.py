@@ -63,8 +63,7 @@ class DatabasePipeline(object):
         model.price = item["price"]
         model.image_url = len(item["file_urls"]) and item["file_urls"][0] or None
         model.active = True
-        if model.name is None:
-            model.name = item.get("name")
+        model.name = item.get("name")
         if not model.make:
             model.make = item.get("make") or ""
         if not model.motor_model:
@@ -73,6 +72,8 @@ class DatabasePipeline(object):
             if model.name.startswith(model.make):
                 model.name = model.name[len(model.make) :]
         model.name = model.name.strip()
+        if item.get("classification"):
+            model.classification = item["classification"]
         self.db.add(model)
         self.db.commit()
         self.scraped_skus.add(item["sku"])

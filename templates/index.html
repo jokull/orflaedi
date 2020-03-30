@@ -8,6 +8,11 @@
     <div class="text-right text-xm text-gray-500">
       *engin ábyrgð tekin á verðum og upplýsingum sem hér koma fram
     </div>
+    <div class="my-6">
+      <a href="https://ellingsen.s4s.is/ellingsen/rafhjol?utm_campaign=siminn-pasutakki&utm_content=&utm_medium=banner&utm_term=&utm_source=sahara.airserve.net">
+        <img src="{{ url_for('static', path='ellingsen.jpg') }}" class="shadow-lg">
+      </a>
+    </div>
   </div>
   {% endif %} {% with flokkur = request.query_params.get('flokkur') %}
   <div class="pickers mb-4">
@@ -78,7 +83,7 @@
     <a
       href="{{ model.scrape_url }}"
       target="_blank"
-      class="rounded overflow-hidden shadow-lg sm:mb-1"
+      class="model model-{{ model.retailer.slug }} rounded overflow-hidden shadow-lg sm:mb-1"
     >
       <img
         class="w-full bg-white object-contain h-64 sm:h-40 p-1 lazyload"
@@ -100,7 +105,7 @@
           ".") }} kr {% else %} - kr {% endif %}
         </p>
         <div class="py-1">
-          <div class="pill mt-2 mr-px retailer-{{ model.retailer.slug }}">
+          <div class="pill mt-2 mr-px pill-{{ model.retailer.slug }}">
             {{ model.retailer.name }}
           </div>
           <div class="pill mt-2">{{ model.classification.value['long'] }}</div>

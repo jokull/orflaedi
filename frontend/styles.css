@@ -73,6 +73,23 @@ nav .selected {
   }
 }
 
+.model-ellingsen {
+  background: #30b3dd;
+}
+
+.model-ellingsen .text-gray-600 {
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.model-ellingsen .name,
+.model-ellingsen p {
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.model-ellingsen .text-gray-600 {
+  color: rgba(255, 255, 255, 0.7);
+}
+
 .bikes .name {
   white-space: nowrap;
   overflow: hidden;
@@ -83,15 +100,10 @@ nav .selected {
   @apply inline-block bg-gray-200 rounded-full px-3 py-1 text-xs font-semibold text-gray-700;
 }
 
-/*
-
-.retailer-ellingsen {
-  background: #30b3dd;
-  text-shadow: 1px 1px 0px rgba(0, 0, 0, 0.6);
+.pill-ellingsen {
+  background: rgba(255, 255, 255, 0.2);
   color: white;
 }
-
-*/
 
 .picker {
   @apply my-6 px-4;

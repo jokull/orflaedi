@@ -12,10 +12,14 @@ class EverestSpider(scrapy.Spider):
     def parse(self, response):
         for row in response.css(".singleImage"):
             image_url = response.urljoin(row.css("a::attr('href')").get())
+            make = row.css("h2 strong::text").get() 
+            name = row.css("h2::text").get().strip()
             name_el, description_el, price_el = row.css(".description>*")
-            make, name = name_el.css("::text").get().split(" ", 1)
 
-            price = int("".join(price_el.css("span")[0].re(r"\d+")))
+            price = "".join(price_el.css("::text").re(r"\d+"))
+            if not price:
+                continue
+            price = int(price)
 
             motor_model = None
             for list_item in description_el.css("::text").getall():

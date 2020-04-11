@@ -45,7 +45,9 @@ def get_classification_counts(db):
         key.value["short"]: value
         for key, value in db.query(
             models.Model.classification, func.count(models.Model.id)
-        ).group_by(models.Model.classification)
+        )
+        .filter(models.Model.active == True)
+        .group_by(models.Model.classification)
     }
 
 

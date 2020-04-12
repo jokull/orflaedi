@@ -45,12 +45,15 @@ This project scrapes Icelandic e-bike retailer websites
 - everest.is
 - nova.is
 - skidathjonustan.com (Akureyri)
+- elko.is
+- sensabikes.is
 
-_TODO_
+**TODO**
 
 - https://arcticebike.com/collections/e-bikes
 - http://www.gastec.is/vorur/p/TA8z9YCkyT/wQpl8dtKLw/sidney/
 - https://www.pukinn.com/ghost-e-bikes
+- http://topphjol.is
 
 ## Data
 

@@ -1,4 +1,8 @@
-{% extends "base.html" %} {% block body %}
+{% extends "base.html" %}
+{% block body %}
+{% include "amp.html" %}
+{% endblock %}
+{% block inner %}
 <div class="sm:px-6">
   {% if not request.query_params.keys() %}
   <div class="welcome my-6 px-4 sm:px-0 sm:mt-8 sm:mb-10">
@@ -9,9 +13,12 @@
       *engin ábyrgð tekin á verðum og upplýsingum sem hér koma fram
     </div>
     <div class="my-6">
+    {#
       <a href="https://ellingsen.s4s.is/ellingsen/rafhjol?utm_campaign=siminn-pasutakki&utm_content=&utm_medium=banner&utm_term=&utm_source=sahara.airserve.net">
         <img src="{{ url_for('static', path='ellingsen.jpg') }}" class="shadow-lg">
       </a>
+    #}
+      {% include "ellingsen-ad.html" %}
     </div>
   </div>
   {% endif %} {% with flokkur = request.query_params.get('flokkur') %}
@@ -115,4 +122,4 @@
     {% endfor %}
   </div>
 </div>
-{% endblock body %}
+{% endblock inner %}

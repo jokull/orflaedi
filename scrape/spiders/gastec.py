@@ -17,7 +17,7 @@ class GastecSpider(scrapy.Spider):
         image_url = response.urljoin(response.css(".img::attr('href')")[0].get())
         name = response.css(".heading h2::text").re_first(r"\w+")
 
-        for price in response.css(".mainContent h4").re("([\d\.]+\.)"):
+        for price in response.css(".mainContent h4").re(r"([\d\.]+\.)"):
             price = int(price.replace(".", ""))
             sku = f"{response.url}{price}"
 

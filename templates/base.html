@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="is" amp>
+<html lang="is" amp4ads>
   <head>
     <meta charset="utf-8" />
     <title>Örflæði: Öll rafhjól og hlaupahjól á einum stað</title>
@@ -24,7 +24,7 @@
         id="navigation"
         class="flex items-center justify-between flex-wrap p-6 max-w-6xl mx-auto"
       >
-        <a id="logo" href="/" class="mr-6 block" alt="Örflæði">
+        <a id="logo" href="/" class="mr-6 block" alt="Örflæði" target="_top">
           {% include "logo.svg" %}
         </a>
         <div class="block sm:hidden">
@@ -48,18 +48,21 @@
         >
           <div class="text-sm sm:flex-grow">
             <a
+              target="_top"
               href="{{ url_for('get_index') }}?flokkur=bike_b"
               class="{{ 'selected' if request.query_params.get('flokkur') == 'bike_b' }} nav-btn"
             >
               Rafhjól <span class="ml-2 text-gray-500">{{ classification_counts['bike_b'] }}
             </a>
             <a
+              target="_top"
               href="{{ url_for('get_index') }}?flokkur=bike_c"
               class="{{ 'selected' if request.query_params.get('flokkur') == 'bike_c' }} nav-btn"
             >
               Rafskútur <span class="ml-2 text-gray-500">{{ classification_counts['bike_c'] }}
             </a>
             <a
+              target="_top"
               href="{{ url_for('get_index') }}?flokkur=lb_1"
               class="{{ 'selected' if request.query_params.get('flokkur') == 'lb_1' }} nav-btn"
             >
@@ -78,7 +81,7 @@
       </nav>
     </div>
     <div class="flex-grow w-full">
-      <div class="max-w-6xl mx-auto">
+      <div class="max-w-6xl mx-auto container">
       {% block inner %}{% endblock %}
       </div>
     </div>

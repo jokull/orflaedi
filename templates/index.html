@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% block body %}
-{% include "amp.html" %}
+  {% if not request.query_params.keys() %}
+  {% include "amp.html" %}
+  {% endif %}
 {% endblock %}
 {% block inner %}
 <div class="sm:px-6">
@@ -37,7 +39,7 @@
         {% for retailer, count in retailer_counts %}
         <li>
           <a
-            href="{{ url_for('get_index') }}?verslun={{ retailer.slug }}{{ '&{}={}'.format('flokkur', flokkur) if flokkur }}"
+            target="_top" href="{{ url_for('get_index') }}?verslun={{ retailer.slug }}{{ '&{}={}'.format('flokkur', flokkur) if flokkur }}"
           >
             <span
               class="{{ 'selected' if request.query_params.get('verslun') == retailer.slug }} name"
@@ -63,7 +65,7 @@
         {% for num, price_range, count in price_range_counts if count %}
         <li>
           <a
-            href="{{ url_for('get_index') }}?verdbil={{ num }}{{ '&{}={}'.format('flokkur', flokkur) if flokkur }}"
+            target="_top" href="{{ url_for('get_index') }}?verdbil={{ num }}{{ '&{}={}'.format('flokkur', flokkur) if flokkur }}"
           >
             <span
               class="{{ 'selected' if request.query_params.get('verdbil') == '{}'.format(num) }}"

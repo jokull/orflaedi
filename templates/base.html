@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="is" amp4ads>
+<html lang="is">
   <head>
     <meta charset="utf-8" />
     <title>Örflæði: Öll rafhjól og hlaupahjól á einum stað</title>
@@ -18,13 +18,12 @@
   </head>
 
   <body class="bg-gray-100 flex flex-col flex-wrap items-center min-h-screen">
-    {% block body %}{% endblock %}
     <div class="w-full">
       <nav
         id="navigation"
         class="flex items-center justify-between flex-wrap p-6 max-w-6xl mx-auto"
       >
-        <a id="logo" href="/" class="mr-6 block" alt="Örflæði" target="_top">
+        <a id="logo" href="/" class="mr-6 block" alt="Örflæði">
           {% include "logo.svg" %}
         </a>
         <div class="block sm:hidden">
@@ -47,23 +46,20 @@
           class="flex-grow bg-gray-100 shadow sm:shadow-none sm:bg-transparent w-full hidden sm:block sm:flex sm:items-center sm:w-auto p-6 sm:p-0"
         >
           <div class="text-sm sm:flex-grow">
-            <a
-              target="_top"
-              href="{{ url_for('get_index') }}?flokkur=bike_b"
+            <a 
+              href="{{ url_for('get_index') }}?flokkur=bike_b" 
               class="{{ 'selected' if request.query_params.get('flokkur') == 'bike_b' }} nav-btn"
             >
               Rafhjól <span class="ml-2 text-gray-500">{{ classification_counts['bike_b'] }}
             </a>
-            <a
-              target="_top"
-              href="{{ url_for('get_index') }}?flokkur=bike_c"
+            <a 
+              href="{{ url_for('get_index') }}?flokkur=bike_c" 
               class="{{ 'selected' if request.query_params.get('flokkur') == 'bike_c' }} nav-btn"
             >
               Rafskútur <span class="ml-2 text-gray-500">{{ classification_counts['bike_c'] }}
             </a>
-            <a
-              target="_top"
-              href="{{ url_for('get_index') }}?flokkur=lb_1"
+            <a 
+              href="{{ url_for('get_index') }}?flokkur=lb_1" 
               class="{{ 'selected' if request.query_params.get('flokkur') == 'lb_1' }} nav-btn"
             >
               Létt bifhjól <span class="ml-2 text-gray-500">{{ classification_counts['lb_1'] + classification_counts['lb_2'] }}
@@ -81,8 +77,8 @@
       </nav>
     </div>
     <div class="flex-grow w-full">
-      <div class="max-w-6xl mx-auto container">
-      {% block inner %}{% endblock %}
+      <div class="max-w-6xl mx-auto">
+      {% block body %}{% endblock body %}
       </div>
     </div>
     <footer class="bg-gray-900 w-full mt-8">

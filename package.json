@@ -19,7 +19,7 @@
     "autoprefixer": "^9.7.4",
     "parcel-bundler": "^1.12.4",
     "prettier": "^1.19.1",
-    "tailwindcss": "^1.2.0",
+    "tailwindcss": "^1.4.4",
     "typescript": "^3.8.3"
   }
 }

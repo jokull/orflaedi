@@ -10,7 +10,6 @@ class TriSpider(scrapy.Spider):
     name = "tri"
 
     start_urls = [
-        "https://tri.is/products/rafmagnshlaupahjol?page=1&ajax=1",
         "https://tri.is/products/rafmagnshjol?page=1&ajax=1",
     ]
 

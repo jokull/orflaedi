@@ -8,7 +8,7 @@
     <div class="text-right text-xm text-gray-500">
       *engin ábyrgð tekin á verðum og upplýsingum sem hér koma fram
     </div>
-    <div class="my-6">
+    <div class="my-6 shadow-lg">
       <script
         id="bid-82316"
         data-overcast="banner"
@@ -80,7 +80,28 @@
       </ul>
     </div>
   </div>
-  {% endwith %}
+  {% endwith %} {% if not request.query_params.keys() %}
+  <a
+    class="block my-6 shadow-lg"
+    target="_blank"
+    href="https://www.tm.is/rafhjol?utm_medium=banner&utm_content=1104x326&utm_campaign=TM_Rafhjol"
+  >
+    <video
+      class="HYPE_element"
+      id="hype-obj-GP42RJ31GW6TLDQ0EKHM"
+      hype_scene_index="0"
+      style="pointer-events: auto; overflow: visible; z-index: 2; width: 100%;"
+      playsinline="true"
+      loop=""
+      autoplay=""
+    >
+      <source
+        src="/static/Default.hyperesources/TM_1104%C3%97326.mp4"
+        type="video/mp4"
+      />
+    </video>
+  </a>
+  {% endif %}
   <div class="my-6 px-4 sm:px-0 mt-4 sm:mt-8">
     <div class="text-xs text-right text-gray-500">
       {{ models.count() }} hjól — Verð ↑

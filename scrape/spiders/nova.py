@@ -30,7 +30,7 @@ class NovaSpider(scrapy.Spider):
         image_url = response.css("._3VOebxMeP_::attr('src')").get()
         image_url = get_original_image_url(image_url)
         price = int(
-            "".join(response.css(".OptionPrice_optionPrice_2t6X5::text").re(r"\d+"))
+            "".join(response.css(".OptionPrice_optionPrice_34JZ4::text").re(r"\d+"))
         )
 
         yield {

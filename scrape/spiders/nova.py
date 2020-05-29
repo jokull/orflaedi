@@ -14,8 +14,8 @@ class NovaSpider(scrapy.Spider):
     name = "nova"
 
     start_urls = [
-        "https://www.nova.is/barinn/dotabud?vendor=Super%20SOCO",
         "https://www.nova.is/barinn/dotabud?type=Rafskúta",
+        "https://www.nova.is/barinn/dotabud?type=Rafhj%C3%B3l",
     ]
 
     def parse(self, response):

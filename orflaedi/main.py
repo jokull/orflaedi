@@ -120,11 +120,16 @@ async def get_index(
             if price_max is not None:
                 models_ = models_.filter(models.Model.price <= price_max)
 
+    # Templates will expect value for all keys
+    classification_counts = get_classification_counts(db)
+    for enum in models.VehicleClassEnum:
+        classification_counts.setdefault(enum.value['short'], 0)
+
     return templates.TemplateResponse(
         "index.html",
         {
             "request": request,
-            "classification_counts": get_classification_counts(db),
+            "classification_counts": classification_counts,
             "retailer_counts": retailer_counts,
             "price_range_counts": price_range_counts,
             "models": models_.order_by(models.Model.price),

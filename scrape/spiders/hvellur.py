@@ -5,7 +5,7 @@ class HvellurSpider(scrapy.Spider):
     name = "hvellur"
 
     start_urls = [
-        "http://hvellur.com/product-category/reidhjol/rafhjol/",
+        "http://hvellur.com/product-category/reidhjol/rafhjol/?per_page=36",
     ]
 
     def parse(self, response):
@@ -24,6 +24,9 @@ class HvellurSpider(scrapy.Spider):
                 ].re(r"\d+")
             )
         )
+
+        if price < 20000:
+            return None
 
         yield {
             "sku": sku,

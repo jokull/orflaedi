@@ -92,7 +92,7 @@ async def get_index(
     verdbil: int = None,
 ):
     models_ = db.query(models.Model).filter(
-        models.Model.active == True, ~models.Model.image_url == None
+        models.Model.active == True, ~(models.Model.image_url == None)
     )
 
     if flokkur is not None:

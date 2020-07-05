@@ -71,7 +71,10 @@ class ElkoSpider(scrapy.Spider):
             "".join(response.css(".product-page .product-price::text").re(r"\d+"))
         )
 
-        file_urls = [response.css(".product-big-image img::attr(image-data-src)").get()]
+        if price < 10000:
+            return None
+
+        file_urls = [response.css(".big-image img::attr(data-lazy-src)").get()]
         name = response.css(".product-page .product-name::text").get().strip()
         name, _ = get_name_and_color(name)
         name, classification = get_clean_name_and_classification(name)

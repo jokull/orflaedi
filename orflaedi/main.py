@@ -91,7 +91,9 @@ async def get_index(
     verslun: str = None,
     verdbil: int = None,
 ):
-    models_ = db.query(models.Model).filter(models.Model.active == True)
+    models_ = db.query(models.Model).filter(
+        models.Model.active == True, ~models.Model.image_url == None
+    )
 
     if flokkur is not None:
         vclass = getattr(models.VehicleClassEnum, flokkur)
@@ -123,7 +125,7 @@ async def get_index(
     # Templates will expect value for all keys
     classification_counts = get_classification_counts(db)
     for enum in models.VehicleClassEnum:
-        classification_counts.setdefault(enum.value['short'], 0)
+        classification_counts.setdefault(enum.value["short"], 0)
 
     return templates.TemplateResponse(
         "index.html",

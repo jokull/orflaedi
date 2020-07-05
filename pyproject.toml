@@ -22,6 +22,7 @@ pylint = "^2.4.4"
 scrapy = "^2.0.0"
 shub = "^2.10.0"
 ipdb = "^0.13.2"
+flake8 = "^3.8.3"
 
 [build-system]
 requires = ["poetry>=0.12"]

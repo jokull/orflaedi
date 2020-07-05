@@ -5,7 +5,7 @@ class HvellurSpider(scrapy.Spider):
     name = "hvellur"
 
     start_urls = [
-        "http://hvellur.com/product-category/reidhjol/rafhjol/?per_page=36",
+        "http://hvellur.com/product-category/reidhjol/rafhjol/",
     ]
 
     def parse(self, response):
@@ -16,6 +16,10 @@ class HvellurSpider(scrapy.Spider):
 
         sku = response.css(".single-product-page::attr('id')").re(r"product-(\d+)")[0]
         make, name = response.css(".product_title::text").get().split(" ", 1)
+
+        if 'rafhjól' not in name.lower():
+            return None
+            
         image_url = response.css(".product-image-wrap a::attr('href')").get()
         price = int(
             "".join(
@@ -24,9 +28,6 @@ class HvellurSpider(scrapy.Spider):
                 ].re(r"\d+")
             )
         )
-
-        if price < 20000:
-            return None
 
         yield {
             "sku": sku,

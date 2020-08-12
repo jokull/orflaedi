@@ -7,6 +7,7 @@ class EllingsenSpider(scrapy.Spider):
 
     start_urls = [
         "https://ellingsen.s4s.is/ellingsen/rafhjol/oell-rafhjol",
+        "https://ellingsen.s4s.is/ellingsen/rafhjol/issimo/rafhjol",
     ]
 
     def parse(self, response):
@@ -33,6 +34,10 @@ class EllingsenSpider(scrapy.Spider):
         for trim in ("rafhlaupahjól", "rafhjól"):
             if name.endswith(f" {trim}"):
                 name = name[:-len(f" {trim}")]
+
+        if name.startswith("Fantic Issimo"):
+            make, name = name.split(" ", 1)
+            name = " ".join(name.split()[:2])
 
         if name == "Mate X Bike":
             make, name = "Mate", "Mate X"

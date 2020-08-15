@@ -4,7 +4,7 @@
     <meta charset="utf-8" />
     <title>Örflæði: Öll rafhjól og hlaupahjól á einum stað</title>
     <link
-      href="{{ url_for('static', path='/dist/styles.css') }}"
+      href="{{ url_for('static', path='/dist/styles.css') }}?cache=1"
       rel="stylesheet"
     />
     <link rel="icon" href="{{ url_for('static', path='/favicon.png') }}" sizes="32x32">
@@ -46,20 +46,20 @@
           class="flex-grow bg-gray-100 shadow sm:shadow-none sm:bg-transparent w-full hidden sm:block sm:flex sm:items-center sm:w-auto p-6 sm:p-0"
         >
           <div class="text-sm sm:flex-grow">
-            <a 
-              href="{{ url_for('get_index') }}?flokkur=bike_b" 
+            <a
+              href="{{ url_for('get_index') }}?flokkur=bike_b"
               class="{{ 'selected' if request.query_params.get('flokkur') == 'bike_b' }} nav-btn"
             >
               Rafhjól <span class="ml-2 text-gray-500">{{ classification_counts['bike_b'] }}
             </a>
-            <a 
-              href="{{ url_for('get_index') }}?flokkur=bike_c" 
+            <a
+              href="{{ url_for('get_index') }}?flokkur=bike_c"
               class="{{ 'selected' if request.query_params.get('flokkur') == 'bike_c' }} nav-btn"
             >
               Rafskútur <span class="ml-2 text-gray-500">{{ classification_counts['bike_c'] }}
             </a>
-            <a 
-              href="{{ url_for('get_index') }}?flokkur=lb_1" 
+            <a
+              href="{{ url_for('get_index') }}?flokkur=lb_1"
               class="{{ 'selected' if request.query_params.get('flokkur') == 'lb_1' }} nav-btn"
             >
               Létt bifhjól <span class="ml-2 text-gray-500">{{ classification_counts['lb_1'] + classification_counts['lb_2'] }}

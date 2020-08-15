@@ -201,7 +201,7 @@ async def add_tag(request: Request, tag: str, id: int, db: Session = Depends(get
     _tag = TagEnum.__members__[tag]
     model.tags = model.tags or []
     if _tag not in model.tags:
-        model.tags.append(_tag)
+        model.tags = list(model.tags) + [_tag]
         db.add(model)
         db.commit()
     return {}

@@ -1,9 +1,10 @@
+from orflaedi.models import TagEnum
 import os
 
 import imgix
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy.orm import Session
-from sqlalchemy import func
+from sqlalchemy import func, text
 from starlette.requests import Request
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
@@ -38,6 +39,7 @@ def imgix_create_url(url, params):
 
 templates = Jinja2Templates(directory="templates")
 templates.env.globals["imgix_url"] = imgix_create_url
+templates.env.globals["tag_enum"] = models.TagEnum
 
 
 def get_classification_counts(db):
@@ -48,6 +50,20 @@ def get_classification_counts(db):
         )
         .filter(models.Model.active == True)
         .group_by(models.Model.classification)
+    }
+
+
+def get_tag_counts(db):
+    return {
+        TagEnum.__members__[tag]: count
+        for tag, count in db.execute(
+            text(
+                "select tags.tag, count(models.id) "
+                "from (select unnest(enum_range(NULL::tagenum)) as tag) as tags "
+                "left join models on tags.tag=ANY(models.tags) group by tags.tag "
+                "order by tags.tag"
+            )
+        ).fetchall()
     }
 
 
@@ -62,25 +78,34 @@ def get_retailer_counts(db, models_):
 
 
 def get_price_range_counts(db, models_):
-    for i, (price_min, price_max) in enumerate(price_ranges):
+    for i, (label, price_min, price_max) in enumerate(price_ranges):
         q = models_
         if price_min is not None:
             q = q.filter(models.Model.price >= price_min)
         if price_max is not None:
             q = q.filter(models.Model.price <= price_max)
-        yield i, (price_min, price_max), q.count()
+        yield i, label, (price_min, price_max), q.count()
 
 
 # An inclusive range of integers for user friendly price categories
 price_ranges = (
-    (None, 59_999),
-    (60_000, 129_999),
-    (130_000, 249_999),
-    (250_000, 600_000),
-    (600_000, None),
+    ("Undir 60.000 kr", None, 59_999),
+    ("60 - 130.000 kr", 60_000, 130_000 - 1),
+    ("130 - 250.000 kr", 130_000, 250_000 - 1),
+    ("250 - 400.000 kr", 250_000, 400_000 - 1),
+    ("400 - 550.000 kr", 400_000, 550_000 - 1),
+    ("550 - 700.000 kr", 550_000, 700_000 - 1),
+    ("Yfir 700.000 kr", 700_000, None),
 )
 
 lett_bifhjol_classes = (models.VehicleClassEnum.lb_1, models.VehicleClassEnum.lb_2)
+
+
+def get_url_query(request: Request, **kwargs):
+    query = dict(request.query_params)
+    for k, v in kwargs.items():
+        query[k] = v
+    return "&".join((f"{k}={v}" for k, v in query.items()))
 
 
 @app.get("/")
@@ -90,9 +115,11 @@ async def get_index(
     flokkur: str = None,
     verslun: str = None,
     verdbil: int = None,
+    tag: str = None,
+    admin: str = None,
 ):
     models_ = db.query(models.Model).filter(
-        models.Model.active == True, ~(models.Model.image_url == None)
+        models.Model.active == True, ~(models.Model.image_url == None)  # noqa
     )
 
     if flokkur is not None:
@@ -105,6 +132,9 @@ async def get_index(
             else:
                 models_ = models_.filter(models.Model.classification == vclass)
 
+    if tag is not None and tag in TagEnum.__members__:
+        models_ = models_.filter(tag == models.Model.tags.any_())
+
     retailer_counts = get_retailer_counts(db, models_)
     price_range_counts = get_price_range_counts(db, models_)
 
@@ -113,7 +143,7 @@ async def get_index(
 
     if verdbil is not None:
         try:
-            price_min, price_max = price_ranges[verdbil]
+            _, price_min, price_max = price_ranges[verdbil]
         except IndexError:
             pass
         else:
@@ -124,6 +154,7 @@ async def get_index(
 
     # Templates will expect value for all keys
     classification_counts = get_classification_counts(db)
+    tag_counts = get_tag_counts(db)
     for enum in models.VehicleClassEnum:
         classification_counts.setdefault(enum.value["short"], 0)
 
@@ -132,9 +163,13 @@ async def get_index(
         {
             "request": request,
             "classification_counts": classification_counts,
+            "tag": tag,
+            "tag_counts": tag_counts,
             "retailer_counts": retailer_counts,
             "price_range_counts": price_range_counts,
-            "models": models_.order_by(models.Model.price),
+            "models": models_.order_by(models.Model.price, models.Model.created.desc()),
+            "admin": bool(admin),
+            "get_url_query": get_url_query,
         },
     )
 
@@ -156,3 +191,31 @@ async def get_model(request: Request, id: int, db: Session = Depends(get_db)):
             "classification_counts": get_classification_counts(db),
         },
     )
+
+
+@app.post("/models/{id}/tags/{tag}")
+async def add_tag(request: Request, tag: str, id: int, db: Session = Depends(get_db)):
+    model = db.query(models.Model).get(id)
+    if model is None or tag not in TagEnum.__members__:
+        raise HTTPException(status_code=404, detail="Model not found")
+    _tag = TagEnum.__members__[tag]
+    model.tags = model.tags or []
+    if _tag not in model.tags:
+        model.tags.append(_tag)
+        db.add(model)
+        db.commit()
+    return {}
+
+
+@app.delete("/models/{id}/tags/{tag}")
+async def remove_tag(request: Request, tag: str, id: int, db: Session = Depends(get_db)):
+    model = db.query(models.Model).get(id)
+    if model is None or tag not in TagEnum.__members__:
+        raise HTTPException(status_code=404, detail="Model not found")
+    _tag = TagEnum.__members__[tag]
+    model.tags = model.tags or []
+    if _tag in model.tags:
+        model.tags.remove(_tag)
+        db.add(model)
+        db.commit()
+    return {}

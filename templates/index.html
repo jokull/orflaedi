@@ -22,65 +22,92 @@
       ></script>
     </div>
   </div>
-  {% endif %} {% with flokkur = request.query_params.get('flokkur') %}
+  {% endif %}
+  {% with flokkur = request.query_params.get('flokkur') %}
   <div class="pickers mb-4">
-    <div
-      class="picker picker-retailers {{ 'expanded' if request.query_params.get('verslun') }}"
-    >
-      <button class="block title">
-        Verslun
-        <img
-          src="{{ url_for('static', path='chevron.down.circle.svg') }}"
-          class="inline h-4 ml-2"
-        />
-      </button>
-      <ul>
-        {% for retailer, count in retailer_counts %}
-        <li>
-          <a
-            href="{{ url_for('get_index') }}?verslun={{ retailer.slug }}{{ '&{}={}'.format('flokkur', flokkur) if flokkur }}"
-          >
-            <span
-              class="{{ 'selected' if request.query_params.get('verslun') == retailer.slug }} name"
-              >{{ retailer.name }}</span
+    <div class="picker picker-retailers">
+      <div class="inner {{ 'expanded' if request.query_params.get('verslun') }}">
+        <button class="block title">
+          Verslun
+          <img
+            src="{{ url_for('static', path='chevron.down.circle.svg') }}"
+            class="inline h-4 ml-2"
+          />
+        </button>
+        <ul>
+          {% for retailer, count in retailer_counts %}
+          <li>
+            <a
+              href="{{ url_for('get_index') }}?{{ get_url_query(request, verslun=retailer.slug) }}"
             >
-            <span class="pill ml-2">{{ count }}</span>
-          </a>
-        </li>
-        {% endfor %}
-      </ul>
+              <span
+                class="{{ 'selected' if request.query_params.get('verslun') == retailer.slug }} name"
+                >{{ retailer.name }}</span
+              >
+              <span class="pill ml-2">{{ count }}</span>
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
     </div>
     <div
-      class="picker picker-price_ranges {{ 'expanded' if request.query_params.get('verdbil') }}"
+      class="picker picker-price_ranges"
     >
-      <button class="block title">
-        Verðbil
-        <img
-          src="{{ url_for('static', path='chevron.down.circle.svg') }}"
-          class="inline h-4 ml-2"
-        />
-      </button>
-      <ul>
-        {% for num, price_range, count in price_range_counts if count %}
-        <li>
-          <a
-            href="{{ url_for('get_index') }}?verdbil={{ num }}{{ '&{}={}'.format('flokkur', flokkur) if flokkur }}"
-          >
-            <span
-              class="{{ 'selected' if request.query_params.get('verdbil') == '{}'.format(num) }}"
+      <div class="inner mb-4 {{ 'expanded' if request.query_params.get('verdbil') }}">
+        <button class="block title">
+          Verðbil
+          <img
+            src="{{ url_for('static', path='chevron.down.circle.svg') }}"
+            class="inline h-4 ml-2"
+          />
+        </button>
+        <ul>
+          {% for num, label, price_range, count in price_range_counts if count %}
+          <li>
+            <a
+              href="{{ url_for('get_index') }}?{{ get_url_query(request, verdbil=num) }}"
             >
-              {{ ({ 0: 'Undir 60.000 kr', 1: '60 - 130.000 kr', 2: '130 -
-              250.000 kr', 3: '250 - 600.000 kr', 4: 'Yfir 600.000 kr' })[num]
-              }}
-            </span>
-            <span class="pill ml-2">{{ count }}</span>
-          </a>
-        </li>
-        {% endfor %}
-      </ul>
+              <span
+                class="{{ 'selected' if request.query_params.get('verdbil') == '{}'.format(num) }}"
+              >
+                {{ label }}
+              </span>
+              <span class="pill ml-2">{{ count }}</span>
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
+      <div class="inner {{ 'expanded' if request.query_params.get('tag') }}">
+        <button class="block title">
+          Eiginleikar
+          <img
+            src="{{ url_for('static', path='chevron.down.circle.svg') }}"
+            class="inline h-4 ml-2"
+          />
+        </button>
+        <ul>
+          {% for tag, count in tag_counts.items() %}
+          <li>
+            <a
+              href="{{ url_for('get_index') }}?{{ get_url_query(request, tag=tag.name) }}"
+            >
+              <span
+                class="{{ 'selected' if request.query_params.get('tag') == tag.name }}"
+              >
+                {{ tag.value }}
+              </span>
+              <span class="pill ml-2">{{ count }}</span>
+            </a>
+          </li>
+          {% endfor %}
+        </ul>
+      </div>
     </div>
   </div>
-  {% endwith %} {% if not request.query_params.keys() %}
+  {% endwith %}
+  {% if not request.query_params.keys() %}
   <a
     class="block my-6 shadow-lg"
     target="_blank"
@@ -101,38 +128,64 @@
   </div>
   <div class="bikes grid grid-cols-1 gap-4">
     {% for model in models %}
-    <a
-      href="{{ model.scrape_url }}"
-      target="_blank"
+    <div
       class="model model-{{ model.retailer.slug }} rounded overflow-hidden shadow-lg sm:mb-1"
     >
-      <img
-        class="w-full bg-white object-contain h-64 sm:h-40 p-1 lazyload"
-        data-src="{{ imgix_url(model.image_url, {'trim':'color', 'trim-tol': '20', 'auto':'format,compress', 'w':'400'}) }}"
-        data-srcset="{{ imgix_url(model.image_url, {'trim':'color', 'trim-tol': '20', 'auto':'format,compress', 'w':'400'}) }} 1x,
-                     {{ imgix_url(model.image_url, {'trim':'color', 'trim-tol': '20', 'auto':'format,compress', 'w':'400', 'dpr': '2'}) }} 2x,
-                     {{ imgix_url(model.image_url, {'trim':'color', 'trim-tol': '20', 'auto':'format,compress', 'w':'400', 'dpr': '3'}) }} 3x"
-        alt="Image of {{ model.name }}"
-      />
-      <div class="px-4 py-4">
-        <div class="font-bold uppercase text-gray-600 text-xs tracking-wider">
-          {{ model.make }}
-        </div>
-        <div title="{{ model.name }}" class="name font-bold text-xl mb-1">
-          {{ model.name }}
-        </div>
-        <p class="text-gray-700 text-base">
-          {% if model.price %} {{ "{:,.0f}".format(model.price).replace(",",
-          ".") }} kr {% else %} - kr {% endif %}
-        </p>
-        <div class="py-1">
-          <div class="pill mt-2 mr-px pill-{{ model.retailer.slug }}">
-            {{ model.retailer.name }}
-          </div>
-          <div class="pill mt-2">{{ model.classification.value['long'] }}</div>
+      <div class="image relative">
+        <a
+          href="{{ model.scrape_url }}"
+          target="_blank"
+          class="w-full">
+          <img
+            class="w-full bg-white object-contain h-64 sm:h-40 p-1 lazyload"
+            data-src="{{ imgix_url(model.image_url, {'trim':'color', 'trim-tol': '20', 'auto':'format,compress', 'w':'400'}) }}"
+            data-srcset="{{ imgix_url(model.image_url, {'trim':'color', 'trim-tol': '20', 'auto':'format,compress', 'w':'400'}) }} 1x,
+                        {{ imgix_url(model.image_url, {'trim':'color', 'trim-tol': '20', 'auto':'format,compress', 'w':'400', 'dpr': '2'}) }} 2x,
+                        {{ imgix_url(model.image_url, {'trim':'color', 'trim-tol': '20', 'auto':'format,compress', 'w':'400', 'dpr': '3'}) }} 3x"
+            alt="Image of {{ model.name }}"
+          />
+        </a>
+        <div class="tags absolute w-full px-3 text-right">
+        {% if admin %}
+          {% for name, tag in tag_enum.__members__.items() %}
+          <a
+            class="pill ml-1 mb-2 {{ 'tagged' if tag in (model.tags or []) }}"
+            data-tag="{{ name }}"
+            data-id="{{ model.id }}"
+            href="#"
+          >{{ tag.value }}</a>
+          {% endfor %}
+        {% endif %}
         </div>
       </div>
-    </a>
+      <a
+        class="block p-3"
+        href="{{ model.scrape_url }}"
+        target="_blank">
+        <div class="flex justify-between align-middle">
+          <div class="font-bold uppercase text-gray-600 text-xs tracking-wider leading-tight">
+            {{ model.make }}
+          </div>
+          <div>
+          {% for tag in (model.tags or [])|sort(attribute="name") %}
+            <span class="pill ml-1">{{ tag.value }}</span>
+          {% endfor %}
+          </div>
+        </div>
+        <div title="{{ model.name }}" class="name font-bold text-xl">
+          {{ model.name }}
+        </div>
+        <div class="flex justify-between align-middle">
+          <p class="text-base whitespace-no-wrap mr-2">
+            {% if model.price %} {{ "{:,.0f}".format(model.price).replace(",",
+            ".") }} kr {% else %} - kr {% endif %}
+          </p>
+          <div class="retailer text-gray-700 truncate" alt="{{ model.retailer.name }}">
+            {{ model.retailer.name }}
+          </div>
+        </div>
+      </a>
+    </div>
     {% endfor %}
   </div>
 </div>

@@ -1,4 +1,3 @@
-from w3lib import url as w3lib_url
 import scrapy
 
 from orflaedi.models import VehicleClassEnum

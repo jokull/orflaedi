@@ -18,7 +18,6 @@ Use something like this for black formating in a `.vscode/settings.json` file.
 
 ```json
 {
-  "python.pythonPath": "~/Library/Caches/pypoetry/virtualenvs/orflaedi-dZ_pPhTz-py3.7",
   "python.formatting.provider": "black",
   "editor.formatOnSave": true,
   "python.formatting.blackArgs": ["--line-length=100"]

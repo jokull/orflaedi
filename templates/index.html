@@ -162,15 +162,8 @@
         class="block p-3"
         href="{{ model.scrape_url }}"
         target="_blank">
-        <div class="flex justify-between align-middle">
-          <div class="font-bold uppercase text-gray-600 text-xs tracking-wider leading-tight">
-            {{ model.make }}
-          </div>
-          <div>
-          {% for tag in (model.tags or [])|sort(attribute="name") %}
-            <span class="pill ml-1">{{ tag.value }}</span>
-          {% endfor %}
-          </div>
+        <div class="font-bold uppercase text-gray-600 text-xs tracking-wider leading-tight">
+          {{ model.make }}
         </div>
         <div title="{{ model.name }}" class="name font-bold text-xl">
           {{ model.name }}

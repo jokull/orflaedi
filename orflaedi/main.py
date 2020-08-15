@@ -215,7 +215,9 @@ async def remove_tag(request: Request, tag: str, id: int, db: Session = Depends(
     _tag = TagEnum.__members__[tag]
     model.tags = model.tags or []
     if _tag in model.tags:
-        model.tags.remove(_tag)
+        tags = list(model.tags)
+        tags.remove(_tag)
+        model.tags = tags
         db.add(model)
         db.commit()
     return {}

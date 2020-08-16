@@ -24,85 +24,91 @@
   </div>
   {% endif %}
   {% with flokkur = request.query_params.get('flokkur') %}
-  <div class="pickers mb-4">
-    <div class="picker picker-retailers">
-      <div class="inner {{ 'expanded' if request.query_params.get('verslun') }}">
-        <button class="block title">
-          Verslun
-          <img
-            src="{{ url_for('static', path='chevron.down.circle.svg') }}"
-            class="inline h-4 ml-2"
-          />
-        </button>
-        <ul>
-          {% for retailer, count in retailer_counts %}
-          <li>
-            <a
-              href="{{ url_for('get_index') }}?{{ get_url_query(request, verslun=retailer.slug) }}"
-            >
-              <span
-                class="{{ 'selected' if request.query_params.get('verslun') == retailer.slug }} name"
-                >{{ retailer.name }}</span
+  <div class="pickers mb-4 sm:flex">
+    <div class="sm:mr-4 lg:flex sm:w-1/3">
+      <div class="picker picker-tags lg:w-1/2 lg:mr-4">
+        <div class="inner {{ 'expanded' if request.query_params.get('tag') }}">
+          <button class="block title">
+            Eiginleikar
+            <img
+              src="{{ url_for('static', path='chevron.down.circle.svg') }}"
+              class="inline h-4 ml-2"
+            />
+          </button>
+          <ul class="grid grid-cols-1 col-gap-4">
+            {% for tag, count in tag_counts.items() %}
+            {% set selected = request.query_params.get('tag') == tag.name %}
+            <li>
+              <a
+                href="{{ url_for('get_index') }}?{{ get_url_query(request, tag=None if selected else tag.name) }}"
               >
-              <span class="pill ml-2">{{ count }}</span>
-            </a>
-          </li>
-          {% endfor %}
-        </ul>
+                <span class="{{ 'selected' if selected }}">{{ tag.value }}</span>
+                {% if selected %}
+                  <span class="px-3 py-1 ml-2 shadow-none bg-transparent text-red-400">×</span>
+                {% else %}
+                  <span class="pill ml-2">{{ count }}</span>
+                {% endif %}
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
+      </div>
+      <div class="picker picker-price_ranges lg:w-1/2">
+        <div class="inner mb-4 {{ 'expanded' if request.query_params.get('verdbil') }}">
+          <button class="block title">
+            Verðbil
+            <img
+              src="{{ url_for('static', path='chevron.down.circle.svg') }}"
+              class="inline h-4 ml-2"
+            />
+          </button>
+          <ul class="grid grid-cols-1 col-gap-4">
+            {% for num, label, price_range, count in price_range_counts if count %}
+            {% set selected = request.query_params.get('verdbil') == '{}'.format(num) %}
+            <li>
+              <a
+                href="{{ url_for('get_index') }}?{{ get_url_query(request, verdbil=None if selected else num) }}"
+              >
+                <span class="{{ 'selected' if selected }}">{{ label }}</span>
+                {% if selected %}
+                  <span class="px-3 py-1 ml-2 shadow-none bg-transparent text-red-400">×</span>
+                {% else %}
+                  <span class="pill ml-2">{{ count }}</span>
+                {% endif %}
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
       </div>
     </div>
-    <div
-      class="picker picker-price_ranges"
-    >
-      <div class="inner mb-4 {{ 'expanded' if request.query_params.get('verdbil') }}">
-        <button class="block title">
-          Verðbil
-          <img
-            src="{{ url_for('static', path='chevron.down.circle.svg') }}"
-            class="inline h-4 ml-2"
-          />
-        </button>
-        <ul>
-          {% for num, label, price_range, count in price_range_counts if count %}
-          <li>
-            <a
-              href="{{ url_for('get_index') }}?{{ get_url_query(request, verdbil=num) }}"
-            >
-              <span
-                class="{{ 'selected' if request.query_params.get('verdbil') == '{}'.format(num) }}"
-              >
-                {{ label }}
-              </span>
-              <span class="pill ml-2">{{ count }}</span>
-            </a>
-          </li>
-          {% endfor %}
-        </ul>
-      </div>
-      <div class="inner {{ 'expanded' if request.query_params.get('tag') }}">
-        <button class="block title">
-          Eiginleikar
-          <img
-            src="{{ url_for('static', path='chevron.down.circle.svg') }}"
-            class="inline h-4 ml-2"
-          />
-        </button>
-        <ul>
-          {% for tag, count in tag_counts.items() %}
-          <li>
-            <a
-              href="{{ url_for('get_index') }}?{{ get_url_query(request, tag=tag.name) }}"
-            >
-              <span
-                class="{{ 'selected' if request.query_params.get('tag') == tag.name }}"
-              >
-                {{ tag.value }}
-              </span>
-              <span class="pill ml-2">{{ count }}</span>
-            </a>
-          </li>
-          {% endfor %}
-        </ul>
+    <div class="lg:flex-shrink sm:w-2/3">
+      <div class="picker picker-retailers">
+        <div class="inner {{ 'expanded' if request.query_params.get('verslun') }}">
+          <button class="block title">
+            Verslun
+            <img
+              src="{{ url_for('static', path='chevron.down.circle.svg') }}"
+              class="inline h-4 ml-2"
+            />
+          </button>
+          <ul class="grid grid-cols-2 col-gap-4 md:grid-cols-3">
+            {% for retailer, count in retailer_counts %}
+            {% set selected = request.query_params.get('verslun') == retailer.slug %}
+            <li>
+              <a href="{{ url_for('get_index') }}?{{ get_url_query(request, verslun=None if selected else retailer.slug) }}">
+                <span class="{{ 'selected' if selected }} name">{{ retailer.name }}</span>
+                {% if selected %}
+                  <span class="px-3 py-1 ml-2 shadow-none bg-transparent text-red-400">×</span>
+                {% else %}
+                  <span class="pill ml-2">{{ count }}</span>
+                {% endif %}
+              </a>
+            </li>
+            {% endfor %}
+          </ul>
+        </div>
       </div>
     </div>
   </div>

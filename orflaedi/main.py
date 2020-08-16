@@ -40,17 +40,22 @@ def imgix_create_url(url, params):
 templates = Jinja2Templates(directory="templates")
 templates.env.globals["imgix_url"] = imgix_create_url
 templates.env.globals["tag_enum"] = models.TagEnum
+templates.env.globals["DEBUG"] = os.getenv("DEBUG") == "true"
 
 
 def get_classification_counts(db):
-    return {
+    counts = {
         key.value["short"]: value
         for key, value in db.query(
             models.Model.classification, func.count(models.Model.id)
         )
-        .filter(models.Model.active == True)
+        .filter(models.Model.active == True)  # noqa
         .group_by(models.Model.classification)
     }
+
+    for enum in models.VehicleClassEnum:
+        counts.setdefault(enum.value["short"], 0)
+    return counts
 
 
 def get_tag_counts(db):
@@ -91,13 +96,13 @@ def get_price_range_counts(db, models_):
 
 # An inclusive range of integers for user friendly price categories
 price_ranges = (
-    ("Undir 60.000 kr", None, 59_999),
-    ("60 - 130.000 kr", 60_000, 130_000 - 1),
-    ("130 - 250.000 kr", 130_000, 250_000 - 1),
-    ("250 - 400.000 kr", 250_000, 400_000 - 1),
-    ("400 - 550.000 kr", 400_000, 550_000 - 1),
-    ("550 - 700.000 kr", 550_000, 700_000 - 1),
-    ("Yfir 700.000 kr", 700_000, None),
+    ("Undir 60 þ.kr.", None, 59_999),
+    ("60 - 130 þ.kr.", 60_000, 130_000 - 1),
+    ("130 - 250 þ.kr.", 130_000, 250_000 - 1),
+    ("250 - 400 þ.kr.", 250_000, 400_000 - 1),
+    ("400 - 550 þ.kr.", 400_000, 550_000 - 1),
+    ("550 - 700 þ.kr.", 550_000, 700_000 - 1),
+    ("Yfir 700 þ.kr.", 700_000, None),
 )
 
 lett_bifhjol_classes = (models.VehicleClassEnum.lb_1, models.VehicleClassEnum.lb_2)
@@ -106,7 +111,10 @@ lett_bifhjol_classes = (models.VehicleClassEnum.lb_1, models.VehicleClassEnum.lb
 def get_url_query(request: Request, **kwargs):
     query = dict(request.query_params)
     for k, v in kwargs.items():
-        query[k] = v
+        if v is None:
+            query.pop(k, None)
+        else:
+            query[k] = v
     return "&".join((f"{k}={v}" for k, v in query.items()))
 
 
@@ -124,41 +132,60 @@ async def get_index(
         models.Model.active == True, ~(models.Model.image_url == None)  # noqa
     )
 
-    if flokkur is not None:
-        vclass = getattr(models.VehicleClassEnum, flokkur)
-        if vclass is not None:
-            if vclass in lett_bifhjol_classes:
-                models_ = models_.filter(
-                    models.Model.classification.in_(lett_bifhjol_classes)
-                )
-            else:
-                models_ = models_.filter(models.Model.classification == vclass)
+    def filter_retailers(query):
+        if verslun is None:
+            return query
+        return query.join(models.Retailer).filter(models.Retailer.slug == verslun)
 
-    if tag is not None and tag in TagEnum.__members__:
-        models_ = models_.filter(tag == models.Model.tags.any_())
-
-    retailer_counts = get_retailer_counts(db, models_)
-    price_range_counts = get_price_range_counts(db, models_)
-
-    if verslun is not None:
-        models_ = models_.join(models.Retailer).filter(models.Retailer.slug == verslun)
-
-    if verdbil is not None:
+    def filter_price_range(query):
+        if verdbil is None:
+            return query
         try:
             _, price_min, price_max = price_ranges[verdbil]
         except IndexError:
-            pass
+            return query
         else:
             if price_min is not None:
-                models_ = models_.filter(models.Model.price >= price_min)
+                query = query.filter(models.Model.price >= price_min)
             if price_max is not None:
-                models_ = models_.filter(models.Model.price <= price_max)
+                query = query.filter(models.Model.price <= price_max)
+        return query
 
-    # Templates will expect value for all keys
+    def filter_classification(query):
+        if flokkur is None:
+            return query
+        vclass = getattr(models.VehicleClassEnum, flokkur)
+        if vclass is not None:
+            if vclass in lett_bifhjol_classes:
+                query = query.filter(
+                    models.Model.classification.in_(lett_bifhjol_classes)
+                )
+            else:
+                query = query.filter(models.Model.classification == vclass)
+        return query
+
+    def filter_tag(query):
+        if tag is None:
+            return query
+        if tag in TagEnum.__members__:
+            return query.filter(tag == models.Model.tags.any_())
+        return query
+
+    retailer_counts = get_retailer_counts(
+        db, filter_tag(filter_classification(filter_price_range(models_)))
+    )
+    price_range_counts = get_price_range_counts(
+        db, filter_tag(filter_classification(filter_retailers(models_)))
+    )
     classification_counts = get_classification_counts(db)
     tag_counts = get_tag_counts(db)
-    for enum in models.VehicleClassEnum:
-        classification_counts.setdefault(enum.value["short"], 0)
+
+    models_ = filter_retailers(models_)
+    models_ = filter_price_range(models_)
+    models_ = filter_classification(models_)
+    models_ = filter_tag(models_)
+
+    # Templates will expect value for all keys
 
     return templates.TemplateResponse(
         "index.html",

@@ -2,15 +2,23 @@
 <html lang="is">
   <head>
     <meta charset="utf-8" />
+    {% if tag -%}
+    <title>{{ tag.value }} - Örflæði</title>
+    <meta property="og:title" content="{{ tag.value }} - Örflæði" />
+    {% elif classification -%}
+    <title>{{ classification.value['long'] }} - Örflæði</title>
+    <meta property="og:title" content="{{ classification.value['long'] }} - Örflæði" />
+    {% else -%}
     <title>Örflæði: Öll rafhjól og hlaupahjól á einum stað</title>
+    <meta property="og:title" content="Örflæði.is" />
+    {% endif -%}
     <link href="{{ url_for('static', path='/dist/styles.css') }}" rel="stylesheet"/>
     <link rel="icon" href="{{ url_for('static', path='/favicon.png') }}" sizes="32x32">
     <link rel="icon" href="{{ url_for('static', path='/favicon.png') }}" sizes="192x192">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta property="og:title" content="Örflæði.is" />
     <meta property="og:description" content="Gagnagrunnur með öllum rafhjól, hlaupahjólum og öðrum léttum rafknúnum farartækjum frá helstu söluaðilum." />
     <meta property="og:type" content="website" />
-    <meta property="og:url" content="https://www.orflaedi.is/" />
+    <meta property="og:url" content="{{ request.url }}" />
     <meta property="og:image" content="{{ url_for('static', path='/opengraph.png') }}" />
   </head>
 

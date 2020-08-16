@@ -187,12 +187,16 @@ async def get_index(
 
     # Templates will expect value for all keys
 
+    tag_enum = getattr(TagEnum, tag) if tag else None
+    classification_enum = getattr(models.VehicleClassEnum, flokkur) if flokkur else None
+
     return templates.TemplateResponse(
         "index.html",
         {
             "request": request,
+            "classification": classification_enum,
             "classification_counts": classification_counts,
-            "tag": tag,
+            "tag": tag_enum,
             "tag_counts": tag_counts,
             "retailer_counts": retailer_counts,
             "price_range_counts": price_range_counts,

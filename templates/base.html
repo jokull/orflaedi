@@ -34,53 +34,13 @@
         <a id="logo" href="/" class="mr-6 block" alt="Örflæði">
           {% include "logo.svg" %}
         </a>
-        <div class="block sm:hidden">
-          <button
-            id="hamburger"
-            class="flex items-center pl-3 py-2 rounded hover:text-gray-800 hover:border-gray-400"
+        <div>
+          <a
+            href="https://www.solberg.is/rafhjolaflokkar/"
+            target="_blank"
+            class="font-bold inline-block text-sm px-4 py-2 leading-none border rounded border-white hover:border-gray shadow bg-white mt-4 sm:mt-0"
+            >Um flokkana</a
           >
-            <svg
-              class="fill-current h-4 w-4"
-              viewBox="0 0 20 20"
-              xmlns="http://www.w3.org/2000/svg"
-            >
-              <title>Menu</title>
-              <path d="M0 3h20v2H0V3zm0 6h20v2H0V9zm0 6h20v2H0v-2z" />
-            </svg>
-          </button>
-        </div>
-        <div
-          id="hamburger-dropdown"
-          class="flex-grow bg-gray-100 shadow sm:shadow-none sm:bg-transparent w-full hidden sm:block sm:flex sm:items-center sm:w-auto p-6 sm:p-0"
-        >
-          <div class="text-sm sm:flex-grow">
-            <a
-              href="{{ url_for('get_index') }}?flokkur=bike_b"
-              class="{{ 'selected' if request.query_params.get('flokkur') == 'bike_b' }} nav-btn"
-            >
-              Rafhjól <span class="ml-2 text-gray-500">{{ classification_counts['bike_b'] }}
-            </a>
-            <a
-              href="{{ url_for('get_index') }}?flokkur=bike_c"
-              class="{{ 'selected' if request.query_params.get('flokkur') == 'bike_c' }} nav-btn"
-            >
-              Rafskútur <span class="ml-2 text-gray-500">{{ classification_counts['bike_c'] }}
-            </a>
-            <a
-              href="{{ url_for('get_index') }}?flokkur=lb_1"
-              class="{{ 'selected' if request.query_params.get('flokkur') == 'lb_1' }} nav-btn"
-            >
-              Létt bifhjól <span class="ml-2 text-gray-500">{{ classification_counts['lb_1'] + classification_counts['lb_2'] }}
-            </a>
-          </div>
-          <div>
-            <a
-              href="https://www.solberg.is/rafhjolaflokkar/"
-              target="_blank"
-              class="font-bold inline-block text-sm px-4 py-2 leading-none border rounded border-white hover:border-gray shadow bg-white mt-4 sm:mt-0"
-              >Um flokkana</a
-            >
-          </div>
         </div>
       </nav>
     </div>

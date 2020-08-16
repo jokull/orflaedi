@@ -11,15 +11,6 @@
   display: block;
 }
 
-.nav-btn {
-  @apply block my-6 font-bold;
-  border-bottom: 2px solid transparent;
-}
-
-nav .selected {
-  border-bottom: 2px solid #777;
-}
-
 .pickers li {
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }
@@ -29,30 +20,6 @@ nav .selected {
   text-overflow: ellipsis;
   display: inline-block;
   max-width: 80%;
-}
-
-@screen sm {
-  .nav-btn {
-    @apply inline-block my-0 text-left mr-4;
-  }
-}
-
-#hamburger-dropdown {
-  text-align: right;
-}
-
-#hamburger-dropdown {
-  position: absolute;
-  right: 0;
-  top: 78px;
-  box-shadow: 0 15px 10px rgba(0, 0, 0, 0.3);
-}
-
-@screen sm {
-  #hamburger-dropdown {
-    position: inherit;
-    box-shadow: none;
-  }
 }
 
 @screen sm {
@@ -102,7 +69,7 @@ nav .selected {
 }
 
 .pill {
-  @apply inline-block bg-gray-200 rounded-full px-3 py-1 text-xs font-semibold text-gray-700 shadow;
+  @apply inline-block bg-gray-300 rounded-full px-3 py-1 text-xs font-semibold text-gray-700;
 }
 
 .image .pill {
@@ -182,6 +149,16 @@ nav .selected {
   }
   .picker ul {
     display: grid;
+  }
+}
+
+.picker-retailers ul {
+  @apply grid-cols-2;
+}
+
+@screen md {
+  .picker-retailers ul {
+    @apply grid-cols-3;
   }
 }
 

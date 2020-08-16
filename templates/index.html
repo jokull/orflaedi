@@ -29,28 +29,55 @@
       <div class="picker picker-tags lg:w-1/2 lg:mr-4">
         <div class="inner {{ 'expanded' if request.query_params.get('tag') }}">
           <button class="block title">
-            Eiginleikar
+            Flokkar
             <img
               src="{{ url_for('static', path='chevron.down.circle.svg') }}"
               class="inline h-4 ml-2"
             />
           </button>
           <ul class="grid grid-cols-1 col-gap-4">
-            {% for tag, count in tag_counts.items() %}
-            {% set selected = request.query_params.get('tag') == tag.name %}
             <li>
               <a
-                href="{{ url_for('get_index') }}?{{ get_url_query(request, tag=None if selected else tag.name) }}"
+                href="{{ url_for('get_index') }}?{{ get_url_query(request, flokkur='bike_b', tag=None) }}"
+                class="{{ 'selected' if request.query_params.get('flokkur') == 'bike_b' }}"
+              >
+                <span class="">Rafhjól</span>
+                <span class="pill ml-2">{{ classification_counts['bike_b'] }}
+              </a>
+            </li>
+            {% for tag, count in tag_counts.items() %}
+            {% set selected = request.query_params.get('tag') == tag.name %}
+            <li class="ml-4">
+              <a
+                href="{{ url_for('get_index') }}?{{ get_url_query(request, flokkur='bike_b', tag=None if selected else tag.name) }}"
               >
                 <span class="{{ 'selected' if selected }}">{{ tag.value }}</span>
                 {% if selected %}
-                  <span class="px-3 py-1 ml-2 shadow-none bg-transparent text-red-400">×</span>
+                <span class="px-3 py-1 ml-2 shadow-none bg-transparent text-red-400">×</span>
                 {% else %}
-                  <span class="pill ml-2">{{ count }}</span>
+                <span class="pill ml-2">{{ count }}</span>
                 {% endif %}
               </a>
             </li>
             {% endfor %}
+            <li>
+              <a
+                href="{{ url_for('get_index') }}?{{ get_url_query(request, flokkur='bike_c', tag=None) }}"
+                class="{{ 'selected' if request.query_params.get('flokkur') == 'bike_c' }}"
+              >
+                <span class="">Rafskútur</span>
+                <span class="pill ml-2">{{ classification_counts['bike_c'] }}
+              </a>
+            </li>
+            <li>
+              <a
+                href="{{ url_for('get_index') }}?{{ get_url_query(request, flokkur='lb_1', tag=None) }}"
+                class="{{ 'selected' if request.query_params.get('flokkur') == 'lb_1' }}"
+              >
+                <span class="">Létt bifhjól</span>
+                <span class="pill ml-2">{{ classification_counts['lb_1'] + classification_counts['lb_2'] }}
+              </a>
+            </li>
           </ul>
         </div>
       </div>
@@ -72,9 +99,9 @@
               >
                 <span class="{{ 'selected' if selected }}">{{ label }}</span>
                 {% if selected %}
-                  <span class="px-3 py-1 ml-2 shadow-none bg-transparent text-red-400">×</span>
+                <span class="px-3 py-1 ml-2 shadow-none bg-transparent text-red-400">×</span>
                 {% else %}
-                  <span class="pill ml-2">{{ count }}</span>
+                <span class="pill ml-2">{{ count }}</span>
                 {% endif %}
               </a>
             </li>
@@ -93,16 +120,16 @@
               class="inline h-4 ml-2"
             />
           </button>
-          <ul class="grid grid-cols-2 col-gap-4 md:grid-cols-3">
+          <ul class="grid col-gap-4">
             {% for retailer, count in retailer_counts %}
             {% set selected = request.query_params.get('verslun') == retailer.slug %}
             <li>
               <a href="{{ url_for('get_index') }}?{{ get_url_query(request, verslun=None if selected else retailer.slug) }}">
                 <span class="{{ 'selected' if selected }} name">{{ retailer.name }}</span>
                 {% if selected %}
-                  <span class="px-3 py-1 ml-2 shadow-none bg-transparent text-red-400">×</span>
+                <span class="px-3 py-1 ml-2 shadow-none bg-transparent text-red-400">×</span>
                 {% else %}
-                  <span class="pill ml-2">{{ count }}</span>
+                <span class="pill ml-2">{{ count }}</span>
                 {% endif %}
               </a>
             </li>

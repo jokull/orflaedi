@@ -7,7 +7,9 @@ from orflaedi.models import VehicleClassEnum
 class ThrumanSpider(scrapy.Spider):
     name = "thruman"
 
-    start_urls = ["https://thruman.is/vara-flokkur/rafhlaupahjol/"]
+    start_urls = [
+        "https://thruman.is/vara-flokkur/rafhlaupahjol/rafhlaupahjol-rafhlaupahjol/"
+    ]
 
     def parse(self, response):
         for link in response.css("ul.products a.woocommerce-LoopProduct-link"):

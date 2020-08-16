@@ -132,10 +132,10 @@
       {{ models.count() }} hjól — Verð ↑
     </div>
   </div>
-  <div class="bikes grid grid-cols-1 gap-4">
+  <div class="bikes grid grid-cols-1 gap-2 sm:gap-4 mx-2 sm:mx-0">
     {% for model in models %}
     <div
-      class="model model-{{ model.retailer.slug }} rounded overflow-hidden shadow-lg sm:mb-1"
+      class="model model-{{ model.retailer.slug }} rounded sm:rounded-md overflow-hidden shadow md:shadow-md sm:mb-1"
     >
       <div class="image relative">
         <a
@@ -143,7 +143,7 @@
           target="_blank"
           class="w-full">
           <img
-            class="w-full bg-white object-contain h-64 sm:h-40 p-1 lazyload"
+            class="w-full bg-white object-contain h-40 sm:h-40 p-2 lazyload"
             data-src="{{ imgix_url(model.image_url, {'trim':'color', 'trim-tol': '20', 'auto':'format,compress', 'w':'400'}) }}"
             data-srcset="{{ imgix_url(model.image_url, {'trim':'color', 'trim-tol': '20', 'auto':'format,compress', 'w':'400'}) }} 1x,
                         {{ imgix_url(model.image_url, {'trim':'color', 'trim-tol': '20', 'auto':'format,compress', 'w':'400', 'dpr': '2'}) }} 2x,

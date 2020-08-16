@@ -48,7 +48,7 @@ class VehicleClassEnum(enum.Enum):
 
 
 class TagEnum(enum.Enum):
-    open_frame = "Opin rammi"
+    open_frame = "Opinn rammi"
     mountain = "Fjallahjól"
     road = "Götuhjól / Racer"
     city = "Borgarhjól"

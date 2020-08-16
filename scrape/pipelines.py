@@ -72,7 +72,8 @@ class DatabasePipeline(object):
             if model.name.startswith(model.make):
                 model.name = model.name[len(model.make) :]
         model.name = model.name.strip()
-        model.classification = model.classification or item.get("classification")
+        if item.get("classification"):
+            model.classification = model.classification or item.get("classification")
         self.db.add(model)
         self.db.commit()
         self.scraped_skus.add(item["sku"])

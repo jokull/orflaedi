@@ -60,7 +60,9 @@ def get_tag_counts(db):
             text(
                 "select tags.tag, count(models.id) "
                 "from (select unnest(enum_range(NULL::tagenum)) as tag) as tags "
-                "left join models on tags.tag=ANY(models.tags) group by tags.tag "
+                "left join models on tags.tag=ANY(models.tags) "
+                "where models.active = true "
+                "group by tags.tag "
                 "order by tags.tag"
             )
         ).fetchall()

@@ -4,7 +4,6 @@ import scrapy
 from orflaedi.models import VehicleClassEnum
 
 
-
 class ThrumanSpider(scrapy.Spider):
     name = "thruman"
 
@@ -16,18 +15,21 @@ class ThrumanSpider(scrapy.Spider):
 
     def parse_product(self, response):
         price = int(
-            "".join(response.css(".woocommerce-Price-amount::text").re(r"\d+"))
+            "".join(response.css(".woocommerce-Price-amount::text")[-1].re(r"\d+"))
         )
+        if price < 40000:
+            return
 
-        make, name = response.css('.product_title::text').get().split(" ", 1)
+        make, name = response.css(".product_title::text").get().split(" ", 1)
 
         yield {
-            "sku": response.css(".single_add_to_cart_button::attr(data-product_id)").get(),
+            "sku": response.css(
+                ".single_add_to_cart_button::attr(data-product_id)"
+            ).get(),
             "name": name,
             "make": make,
             "classification": VehicleClassEnum.bike_c,
             "price": price,
-            "file_urls": [response.css('.gallery_image_link::attr(href)').get()],
+            "file_urls": [response.css(".gallery_image_link::attr(href)").get()],
             "scrape_url": response.url,
-
         }

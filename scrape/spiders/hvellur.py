@@ -17,17 +17,12 @@ class HvellurSpider(scrapy.Spider):
         sku = response.css(".single-product-page::attr('id')").re(r"product-(\d+)")[0]
         make, name = response.css(".product_title::text").get().split(" ", 1)
 
-        if 'rafhjól' not in name.lower():
+        if "rafhjól" not in name.lower():
             return None
-            
+
         image_url = response.css(".product-image-wrap a::attr('href')").get()
-        price = int(
-            "".join(
-                response.css(".entry-summary .price .woocommerce-Price-amount::text")[
-                    2
-                ].re(r"\d+")
-            )
-        )
+        price_el = response.css(".entry-summary .price .woocommerce-Price-amount::text")
+        price = int("".join(price_el.re(r"\d+")))
 
         yield {
             "sku": sku,

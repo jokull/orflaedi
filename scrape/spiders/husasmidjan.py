@@ -6,15 +6,24 @@ from orflaedi.models import VehicleClassEnum
 
 
 products = {
-    "3903001": ('Xiaomi', 'M365'),
-    "3903008": ('Rawlink', 'Rawlink'),
+    "3903001": ("Xiaomi", "M365"),
+    "3903008": ("Rawlink", "Rawlink"),
+    "3903100": ("Enox-Yadea", "EM215"),
+    "3903101": ("Enox-Yadea", "V7"),
 }
 
 
 structure = (
-    (VehicleClassEnum.bike_c, "https://www.husa.is/umbraco/api/product/GetProducts?categoryId=5637294576"),
-    (VehicleClassEnum.bike_b, "https://www.husa.is/umbraco/api/product/GetProducts?categoryId=5637171587"),
+    (
+        VehicleClassEnum.bike_c,
+        "https://www.husa.is/umbraco/api/product/GetProducts?categoryId=5637294576",
+    ),
+    (
+        VehicleClassEnum.bike_b,
+        "https://www.husa.is/umbraco/api/product/GetProducts?categoryId=5637171587",
+    ),
 )
+
 
 class HusasmidjanSpider(scrapy.Spider):
     name = "husasmidjan"
@@ -30,24 +39,23 @@ class HusasmidjanSpider(scrapy.Spider):
             raise
 
         for product in json.loads(response.text):
-            sku = product['Sku']
+            sku = product["Sku"]
             if sku in products:
                 name, make = products[sku]
             else:
-                name = product['Title']
-                make = product.get('Brand')
+                name = product["Title"]
+                make = product.get("Brand")
 
-            prefix = 'Reiðhjól Rafmagns '
+            prefix = "Reiðhjól Rafmagns "
             if name.startswith(prefix):
-                name = name[len(prefix):]
+                name = name[len(prefix) :]
 
             yield {
                 "sku": sku,
                 "name": name,
                 "make": make,
                 "classification": classification,
-                "price": product['CurrencyString'],
-                "file_urls": [response.urljoin(product['ImageUrl'])],
-                "scrape_url": response.urljoin(product['Url']),
-
+                "price": product["CurrencyString"],
+                "file_urls": [response.urljoin(product["ImageUrl"])],
+                "scrape_url": response.urljoin(product["Url"]),
             }

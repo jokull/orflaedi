@@ -17,7 +17,7 @@ class ThrumanSpider(scrapy.Spider):
 
     def parse_product(self, response):
         price = int(
-            "".join(response.css(".woocommerce-Price-amount::text")[-1].re(r"\d+"))
+            "".join(response.css(".woocommerce-Price-amount bdi")[-1].re(r"\d+"))
         )
         if price < 40000:
             return

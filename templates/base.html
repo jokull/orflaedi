@@ -7,22 +7,44 @@
     <meta property="og:title" content="{{ tag.value }} - Örflæði" />
     {% elif classification -%}
     <title>{{ classification.value['long'] }} - Örflæði</title>
-    <meta property="og:title" content="{{ classification.value['long'] }} - Örflæði" />
+    <meta
+      property="og:title"
+      content="{{ classification.value['long'] }} - Örflæði"
+    />
     {% else -%}
     <title>Örflæði: Öll rafhjól og hlaupahjól á einum stað</title>
     <meta property="og:title" content="Örflæði.is" />
+    {% endif -%} {% if DEBUG -%}
+    <link
+      href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css"
+      rel="stylesheet"
+    />
     {% endif -%}
-    {% if DEBUG -%}
-    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet">
-    {% endif -%}
-    <link href="{{ url_for('static', path='/dist/styles.css') }}" rel="stylesheet"/>
-    <link rel="icon" href="{{ url_for('static', path='/favicon.png') }}" sizes="32x32">
-    <link rel="icon" href="{{ url_for('static', path='/favicon.png') }}" sizes="192x192">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta property="og:description" content="Gagnagrunnur með öllum rafhjól, hlaupahjólum og öðrum léttum rafknúnum farartækjum frá helstu söluaðilum." />
+    <link
+      href="{{ url_for('static', path='/dist/styles.css') }}?cache"
+      rel="stylesheet"
+    />
+    <link
+      rel="icon"
+      href="{{ url_for('static', path='/favicon.png') }}"
+      sizes="32x32"
+    />
+    <link
+      rel="icon"
+      href="{{ url_for('static', path='/favicon.png') }}"
+      sizes="192x192"
+    />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      property="og:description"
+      content="Gagnagrunnur með öllum rafhjól, hlaupahjólum og öðrum léttum rafknúnum farartækjum frá helstu söluaðilum."
+    />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="{{ request.url }}" />
-    <meta property="og:image" content="{{ url_for('static', path='/opengraph.png') }}" />
+    <meta
+      property="og:image"
+      content="{{ url_for('static', path='/opengraph.png') }}"
+    />
   </head>
 
   <body class="bg-gray-100 flex flex-col flex-wrap items-center min-h-screen">
@@ -46,15 +68,28 @@
     </div>
     <div class="flex-grow w-full">
       <div class="max-w-6xl mx-auto">
-      {% block body %}{% endblock body %}
+        {% block body %}{% endblock body %}
       </div>
     </div>
     <footer class="bg-gray-900 w-full mt-8">
       <div class="mx-auto max-w-6xl px-4 py-8 sm:px-6 text-xs sm:text-sm">
-        <p class="my-1 text-gray-600">Vefsíðan notar Scrapy til að safna upplýsingum frá vefsíðum verslana</p>
-        <p class="my-1 text-gray-600">Þessi vefsíða notar ekki cookies og safnar engum persónugögnum</p>
-        <p class="my-1 text-gray-600">Kóðinn af síðunni er á <a href="https://github.com/jokull/orflaedi">github.com/jokull/orflaedi</a></p>
-        <p class="my-1 text-gray-600"><a href="mailto:jokull@solberg.is" class="font-bold text-gray-500">jokull@solberg.is</a></p>
+        <p class="my-1 text-gray-600">
+          Vefsíðan notar Scrapy til að safna upplýsingum frá vefsíðum verslana
+        </p>
+        <p class="my-1 text-gray-600">
+          Þessi vefsíða notar ekki cookies og safnar engum persónugögnum
+        </p>
+        <p class="my-1 text-gray-600">
+          Kóðinn af síðunni er á
+          <a href="https://github.com/jokull/orflaedi"
+            >github.com/jokull/orflaedi</a
+          >
+        </p>
+        <p class="my-1 text-gray-600">
+          <a href="mailto:jokull@solberg.is" class="font-bold text-gray-500"
+            >jokull@solberg.is</a
+          >
+        </p>
       </div>
     </footer>
     {% include "fathom.html" %}

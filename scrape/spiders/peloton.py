@@ -18,8 +18,12 @@ class PelotonSpider(scrapy.Spider):
         sku = response.css(".sku::text").get()
         name = response.css(".product_title::text").get()
         make = response.css(".product_meta span")[-1].css("a::text").get()
-        image_url = response.css(".woocommerce-product-gallery__wrapper a::attr('href')").get()
-        price = int("".join(response.css(".summary .woocommerce-Price-amount").re(r"\d")))
+        image_url = response.css(
+            ".woocommerce-product-gallery__wrapper a::attr('href')"
+        ).get()
+        price = int(
+            "".join(response.css(".summary .woocommerce-Price-amount").re(r"\d"))
+        )
 
         yield {
             "sku": sku,

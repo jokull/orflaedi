@@ -23,6 +23,7 @@ def sync(DB_URL: str = "postgresql://orflaedi:@localhost/orflaedi"):
         os.environ["DATABASE_URL"] = TEMP_DB_URL
         from orflaedi.database import engine, Base
         from orflaedi.models import Model, Retailer, VehicleClassEnum, TagEnum
+
         Base.metadata.create_all(engine)
 
         with S(DB_URL) as s_current, S(TEMP_DB_URL) as s_target:

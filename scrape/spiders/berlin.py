@@ -22,6 +22,8 @@ class BerlinSpider(scrapy.Spider):
             "name": response.css(".section__title-text::text").get(),
             "make": response.css("h4.section__title-desc a::text").get(),
             "price": price,
-            "file_urls": [response.css(".product-single__photo__img::attr('data-pswp-src')").get()],
+            "file_urls": [
+                response.css(".product-single__photo__img::attr('data-pswp-src')").get()
+            ],
             "scrape_url": response.url,
         }

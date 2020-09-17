@@ -19,7 +19,9 @@ class OfsiSpider(scrapy.Spider):
         sku = response.css("#ProductJson-product-template").re(r'"id":(\d+)')[0]
         name = response.css(".product-single__title::text").get().title()
         image_url = response.css(".product-single__photo::attr('data-zoom')").get()
-        price = int("".join(response.css("#ProductPrice-product-template::text").re(r"\d+")))
+        price = int(
+            "".join(response.css("#ProductPrice-product-template::text").re(r"\d+"))
+        )
 
         yield {
             "sku": sku,

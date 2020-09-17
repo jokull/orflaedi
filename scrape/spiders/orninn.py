@@ -14,7 +14,9 @@ class OrninnSpider(scrapy.Spider):
 
     def parse_product(self, response):
 
-        price = int("".join(response.css(".entry-summary .price .amount::text")[0].re(r"\d+")))
+        price = int(
+            "".join(response.css(".entry-summary .price .amount::text")[0].re(r"\d+"))
+        )
 
         file_urls = [response.css(".slider a::attr(href)")[0].get()]
 

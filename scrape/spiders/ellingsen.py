@@ -18,14 +18,18 @@ class EllingsenSpider(scrapy.Spider):
 
     def parse_product(self, response):
 
-        price = int("".join(response.css(".information>.product-price::text").re(r"\d+")))
+        price = int(
+            "".join(response.css(".information>.product-price::text").re(r"\d+"))
+        )
 
         file_urls = []
         for image_url in response.css(".large-image-preview img::attr(src)").getall():
             if not image_url.endswith(".jpg"):
                 continue
             url = response.urljoin(image_url)
-            url = w3lib_url.add_or_replace_parameters(url, {"Width": "2400", "Height": "2400"})
+            url = w3lib_url.add_or_replace_parameters(
+                url, {"Width": "2400", "Height": "2400"}
+            )
             file_urls.append(url)
 
         name = response.css(".information>.product-name::text").get()
@@ -33,7 +37,7 @@ class EllingsenSpider(scrapy.Spider):
 
         for trim in ("rafhlaupahjól", "rafhjól"):
             if name.endswith(f" {trim}"):
-                name = name[:-len(f" {trim}")]
+                name = name[: -len(f" {trim}")]
 
         if name.startswith("Fantic Issimo"):
             make, name = name.split(" ", 1)
@@ -50,7 +54,6 @@ class EllingsenSpider(scrapy.Spider):
 
         if name == "Legend eBike Siena":
             make, name = "Legend", "Siena"
-
 
         for _make in ("Tern", "Zero"):
             if name.startswith(_make):

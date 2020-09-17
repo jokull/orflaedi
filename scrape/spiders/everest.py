@@ -12,7 +12,7 @@ class EverestSpider(scrapy.Spider):
     def parse(self, response):
         for row in response.css(".singleImage"):
             image_url = response.urljoin(row.css("a::attr('href')").get())
-            make = row.css("h2 strong::text").get() 
+            make = row.css("h2 strong::text").get()
             name = row.css("h2::text").get().strip()
             name_el, description_el, price_el = row.css(".description>*")
 

@@ -241,7 +241,9 @@ async def add_tag(request: Request, tag: str, id: int, db: Session = Depends(get
 
 
 @app.delete("/models/{id}/tags/{tag}")
-async def remove_tag(request: Request, tag: str, id: int, db: Session = Depends(get_db)):
+async def remove_tag(
+    request: Request, tag: str, id: int, db: Session = Depends(get_db)
+):
     model = db.query(models.Model).get(id)
     if model is None or tag not in TagEnum.__members__:
         raise HTTPException(status_code=404, detail="Model not found")

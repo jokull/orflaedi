@@ -28,7 +28,9 @@ class RafmagnshjolSpider(scrapy.Spider):
             "make": "QWIC",
             "price": price,
             "file_urls": [
-                response.css(".woocommerce-product-gallery__wrapper a::attr(href)").get()
+                response.css(
+                    ".woocommerce-product-gallery__wrapper a::attr(href)"
+                ).get()
             ],
             "scrape_url": response.url,
         }

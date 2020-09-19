@@ -22,13 +22,13 @@ class MarkidSpider(scrapy.Spider):
             .split("?", 1)
         )
 
+        price_el = response.css(".price bdi::text")[0]
+
         yield {
             "sku": sku,
             "name": name,
             "make": make,
-            "price": int(
-                "".join(response.css(".woocommerce-Price-amount::text")[0].re(r"\d+"))
-            ),
+            "price": int("".join(price_el.re(r'\d'))),
             "file_urls": [image_url],
             "scrape_url": response.url,
         }

@@ -8,6 +8,7 @@ class EllingsenSpider(scrapy.Spider):
     start_urls = [
         "https://ellingsen.s4s.is/ellingsen/rafhjol/oell-rafhjol",
         "https://ellingsen.s4s.is/ellingsen/rafhjol/issimo/rafhjol",
+        "https://ellingsen.s4s.is/ellingsen/rafhjol/merida",
     ]
 
     def parse(self, response):

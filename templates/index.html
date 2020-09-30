@@ -142,20 +142,6 @@
     </div>
   </div>
   {% endwith %}
-  {% if not request.query_params.keys() %}
-  <a
-    class="block my-6 shadow-lg"
-    target="_blank"
-    href="https://www.tm.is/rafhjol?utm_medium=banner&utm_content=1104x326&utm_campaign=TM_Rafhjol"
-  >
-    <video playsinline autoplay muted loop>
-      <source
-        src="https://www.alnetid.com/banners/0520/TM/TRY_12860_1104x326/Default/Default.hyperesources/TM_1104%C3%97326.mp4"
-        type="video/mp4"
-      />
-    </video>
-  </a>
-  {% endif %}
   <div class="my-6 px-4 sm:px-0 mt-4 sm:mt-8">
     <div class="text-xs text-right text-gray-500">
       {{ models.count() }} hjól — Verð ↑

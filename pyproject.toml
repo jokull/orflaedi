@@ -2,7 +2,7 @@
 name = "orflaedi"
 version = "0.1.0"
 description = ""
-authors = ["Jökull Sólberg Auðunsson <jokull@solberg.is>"]
+authors = ["Jokull Solberg <jokull@solberg.is>"]
 
 [tool.poetry.dependencies]
 python = "^3.7"

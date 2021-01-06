@@ -19,18 +19,18 @@ class NovaSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        for link in response.css(".BscZe6kcLQ"):
+        for link in response.css("._3HOZOUI1WV a"):
             yield response.follow(link, self.parse_product)
 
     def parse_product(self, response):
 
         sku = response.url
-        name = response.css(".ar9onfjwtl::text").get().title()
-        make = response.css("._3IURkV6Lje::text").get().title()
-        image_url = response.css("._3VOebxMeP_::attr('src')").get()
+        name = response.css("._2lrIFynBxV::text").get().title()
+        make = response.css("._1A6KQNOkFI::text").get().title()
+        image_url = response.css("._2l8kk3sVj1::attr('src')").get()
         image_url = get_original_image_url(image_url)
         price = int(
-            "".join(response.css(".OptionPrice_optionPrice_2t6X5::text").re(r"\d+"))
+            "".join(response.css(".OptionPrice_optionPrice_34JZ4::text").re(r"\d+"))
         )
 
         yield {

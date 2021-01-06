@@ -32,6 +32,6 @@ class ThrumanSpider(scrapy.Spider):
             "make": make,
             "classification": VehicleClassEnum.bike_c,
             "price": price,
-            "file_urls": [response.css(".gallery_image_link::attr(href)").get()],
+            "file_urls": [response.css(".woocommerce-product-gallery__image a::attr(href)").get()],
             "scrape_url": response.url,
         }

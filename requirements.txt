@@ -127,9 +127,9 @@ sqlalchemy==1.3.18 \
 starlette==0.13.2 \
     --hash=sha256:6169ee78ded501095d1dda7b141a1dc9f9934d37ad23196e180150ace2c6449b \
     --hash=sha256:a9bb130fa7aa736eda8a814b6ceb85ccf7a209ed53843d0d61e246b380afa10f
-uvicorn==0.11.3 \
-    --hash=sha256:0f58170165c4495f563d8224b2f415a0829af0412baa034d6f777904613087fd \
-    --hash=sha256:6fdaf8e53bf1b2ddf0fe9ed06079b5348d7d1d87b3365fe2549e6de0d49e631c
+uvicorn==0.11.7 \
+    --hash=sha256:1d46a22cc55a52f5567e0c66f000ae56f26263e44cef59b7c885bf10f487ce6e \
+    --hash=sha256:b50f7f4c0c499c9b8d0280924cfbd24b90ba02456e3dc80934b9a786a291f09f
 uvloop==0.14.0; sys_platform != "win32" and sys_platform != "cygwin" and platform_python_implementation != "PyPy" \
     --hash=sha256:08b109f0213af392150e2fe6f81d33261bb5ce968a288eb698aad4f46eb711bd \
     --hash=sha256:4544dcf77d74f3a84f03dd6278174575c44c67d7165d4c42c71db3fdc3860726 \

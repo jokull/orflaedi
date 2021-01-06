@@ -33,7 +33,7 @@ builder = imgix.UrlBuilder("orflaedi.imgix.net", sign_key=os.getenv("IMGIX_TOKEN
 
 def imgix_create_url(url, params):
     if url.startswith("//"):
-        url = "https:{}".format(url)
+        url = f"https:{url}"
     return builder.create_url(url, params)
 
 

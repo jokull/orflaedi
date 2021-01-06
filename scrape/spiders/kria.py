@@ -16,7 +16,14 @@ class KriaSpider(scrapy.Spider):
 
     def parse_product(self, response):
 
-        price = int("".join(response.css(".woocommerce-Price-amount bdi::text")[0].re(r"\d+")))
+        price_el = response.css(".wrap_price .woocommerce-Price-amount bdi::text")
+        if not price_el:
+            return
+
+        price = int("".join(price_el[0].re(r"\d+")))
+        if price < 30_000:
+            return
+            
         image_url = response.css(".item_slick::attr(href)").get()
         sku = response.xpath("//meta[@property='og:url']").css("::attr(content)").get()
 

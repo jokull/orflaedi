@@ -6,14 +6,11 @@ authors = ["Jokull Solberg <jokull@solberg.is>"]
 
 [tool.poetry.dependencies]
 python = "^3.7"
-fastapi = "^0.50.0"
 jinja2 = "^2.11.1"
-aiofiles = "^0.4.0"
 sqlalchemy = "^1.3.18"
 psycopg2 = "^2.8.4"
 imgix = "^3.1.1"
-python-dotenv = "^0.12.0"
-uvicorn = "^0.11.3"
+fastapi = {extras = ["all"], version = "^0.63.0"}
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
@@ -23,7 +20,7 @@ scrapy = "^2.0.0"
 ipdb = "^0.13.2"
 flake8 = "^3.8.3"
 migra = "^1.0.1597374790"
-typer = "^0.3.1"
+typer = "^0.3.2"
 sqlalchemy-stubs = "^0.3"
 
 [build-system]

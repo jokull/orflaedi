@@ -19,7 +19,7 @@ pylint = "^2.4.4"
 scrapy = "^2.0.0"
 ipdb = "^0.13.2"
 flake8 = "^3.8.3"
-migra = "^1.0.1597374790"
+migra = "^1.0.1605230943"
 typer = "^0.3.2"
 sqlalchemy-stubs = "^0.3"
 

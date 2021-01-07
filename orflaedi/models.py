@@ -52,6 +52,7 @@ class TagEnum(enum.Enum):
     mountain = "Fjallahjól"
     road = "Götuhjól / Racer"
     city = "Borgarhjól"
+    cargo = "Burðarhjól"
 
 
 class Retailer(Base):

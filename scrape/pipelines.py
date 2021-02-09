@@ -40,9 +40,10 @@ class DatabasePipeline(object):
 
     def close_spider(self, spider):
         # we can deactivate these since they are no longer available
-        self.db.query(Model).filter(
-            ~Model.sku.in_(self.scraped_skus), Model.retailer == self.retailer
-        ).update({"active": False}, synchronize_session=False)
+        if not getattr(spider, 'skip', False):
+            self.db.query(Model).filter(
+                ~Model.sku.in_(self.scraped_skus), Model.retailer == self.retailer
+            ).update({"active": False}, synchronize_session=False)
         self.db.commit()
         self.db.close()
 

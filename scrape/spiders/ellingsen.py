@@ -1,4 +1,5 @@
-from w3lib import url as w3lib_url
+import json
+import re
 import scrapy
 
 
@@ -6,62 +7,67 @@ class EllingsenSpider(scrapy.Spider):
     name = "ellingsen"
 
     start_urls = [
-        "https://ellingsen.s4s.is/ellingsen/rafhjol/oell-rafhjol",
-        "https://ellingsen.s4s.is/ellingsen/rafhjol/issimo/rafhjol",
-        "https://ellingsen.s4s.is/ellingsen/rafhjol/merida",
+        "https://rafhjolasetur.is/collections/rafhjol",
+        "https://rafhjolasetur.is/collections/rafhlaupahjol",
     ]
 
     def parse(self, response):
-        for el in response.css(".products-container .product"):
-            if el.css(".product_Discount_Text::text").get() == "Uppselt":
-                continue
+        for el in response.css(".collection-matrix .product-wrap"):
             yield response.follow(el.css("a::attr(href)")[1], self.parse_product)
 
     def parse_product(self, response):
 
-        price = int(
-            "".join(response.css(".information>.product-price::text").re(r"\d+"))
-        )
+        file_urls = [
+            "https:"
+            + response.css(".product-gallery__container .lazyloaded::attr(src)")
+            .get()
+            .replace("_1200x", "_5000x")
+        ]
 
-        file_urls = []
-        for image_url in response.css(".large-image-preview img::attr(src)").getall():
-            if not image_url.endswith(".jpg"):
-                continue
-            url = response.urljoin(image_url)
-            url = w3lib_url.add_or_replace_parameters(
-                url, {"Width": "2400", "Height": "2400"}
-            )
-            file_urls.append(url)
+        obj = None
 
-        name = response.css(".information>.product-name::text").get()
-        make = None
+        for script_tag in response.css("script::text").getall():
+            if "var meta = " in script_tag:
+                _, obj = script_tag.split("var meta = ")
+                obj, _ = obj.split(";", 1)
+                obj = json.loads(obj)
 
-        for trim in ("rafhlaupahjól", "rafhjól"):
-            if name.endswith(f" {trim}"):
-                name = name[: -len(f" {trim}")]
+        if obj is None:
+            print("NO OBJ!")
+            return None
 
-        if name.startswith("Fantic Issimo"):
-            make, name = name.split(" ", 1)
-            name = " ".join(name.split()[:2])
+        make = obj["product"]["vendor"]
+        price = int(obj["product"]["variants"][0]["price"] / 100)
+        name = obj["product"]["variants"][0]["name"]
+        sku = obj["product"]["variants"][0]["sku"]
 
-        if name == "Mate X Bike":
-            make, name = "Mate", "Mate X"
+        if make == "Riese & Muller":
+            make = "Riese & Müller"
 
-        if name == "Legend eBike Milano":
-            make, name = "Legend", "Milano"
+        if make in name:
+            name = "".join(name.split(make)).strip()
 
-        if name == "Legend eBike Monza":
-            make, name = "Legend", "Monza"
+        stripwords = [
+            "svart",
+            "hvítt",
+            "blátt",
+            "gult",
+            "rautt",
+            "blátt",
+            "brúnt",
+            "grátt",
+            "17.5ah",
+            "36v",
+            "ebike",
+            "rafhlaupahjól",
+            "rafhjól",
+            "fjallarafhjól",
+        ]
 
-        if name == "Legend eBike Siena":
-            make, name = "Legend", "Siena"
-
-        for _make in ("Tern", "Zero"):
-            if name.startswith(_make):
-                make, name = _make, name
+        name = " ".join(w for w in name.split() if w.lower() not in stripwords)
 
         yield {
-            "sku": response.css(".information>.tiny-productID::text").get(),
+            "sku": sku,
             "name": name,
             "make": make,
             "price": price,

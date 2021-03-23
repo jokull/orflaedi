@@ -40,7 +40,7 @@ class DatabasePipeline(object):
 
     def close_spider(self, spider):
         # we can deactivate these since they are no longer available
-        if not getattr(spider, 'skip', False):
+        if not getattr(spider, "skip", False):
             self.db.query(Model).filter(
                 ~Model.sku.in_(self.scraped_skus), Model.retailer == self.retailer
             ).update({"active": False}, synchronize_session=False)
@@ -74,7 +74,7 @@ class DatabasePipeline(object):
                 model.name = model.name[len(model.make) :]
         model.name = model.name.strip()
         if item.get("classification"):
-            model.classification = model.classification or item.get("classification")
+            model.classification = item["classification"]
         self.db.add(model)
         self.db.commit()
         self.scraped_skus.add(item["sku"])

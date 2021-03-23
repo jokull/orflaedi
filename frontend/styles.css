@@ -40,31 +40,23 @@
   }
 }
 
-/*
-
-.model-ellingsen {
-  background: #30b3dd;
+.model-tri {
+  background: #000;
 }
 
-.model-ellingsen .text-gray-600 {
-  color: rgba(255, 255, 255, 0.7);
+.model-tri .name,
+.model-tri p {
+  color: rgba(255, 255, 255, 1);
 }
 
-.model-ellingsen .name,
-.model-ellingsen p {
-  color: rgba(255, 255, 255, 0.9);
+.model-tri .text-gray-600 {
+  color: rgba(255, 255, 255, 0.6);
 }
 
-.model-ellingsen .text-gray-600 {
-  color: rgba(255, 255, 255, 0.7);
-}
-
-.model-ellingsen .retailer {
-  color: rgba(0, 0, 0, 0.6);
+.model-tri .retailer {
+  color: rgba(244, 151, 56, 1);
   font-weight: bold;
 }
-
-*/
 
 .bikes .name {
   white-space: nowrap;

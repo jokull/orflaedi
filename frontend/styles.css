@@ -6,11 +6,6 @@
   fill: blue;
 }
 
-#logo svg {
-  width: 140px;
-  display: block;
-}
-
 .pickers li {
   border-bottom: 1px solid rgba(0, 0, 0, 0.1);
 }

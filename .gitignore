@@ -8,13 +8,14 @@ project.egg-info/
 # VSCode
 .vscode
 
-# Yarn
-node_modules
-yarn.lock
-
 # Poetry
 poetry.lock
 
 # Project
 .cache
 .env
+
+# Frontend
+package-lock.json
+node_modules
+yarn.lock

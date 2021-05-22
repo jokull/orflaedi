@@ -7,33 +7,16 @@
     <meta property="og:title" content="{{ tag.value }} - Örflæði" />
     {% elif classification -%}
     <title>{{ classification.value['long'] }} - Örflæði</title>
-    <meta
-      property="og:title"
-      content="{{ classification.value['long'] }} - Örflæði"
-    />
+    <meta property="og:title" content="{{ classification.value['long'] }} - Örflæði" />
     {% else -%}
     <title>Örflæði: Öll rafhjól og hlaupahjól á einum stað</title>
     <meta property="og:title" content="Örflæði.is" />
     {% endif -%} {% if DEBUG -%}
-    <link
-      href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css"
-      rel="stylesheet"
-    />
+    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet" />
     {% endif -%}
-    <link
-      href="{{ url_for('static', path='/dist/styles.css') }}?cache4"
-      rel="stylesheet"
-    />
-    <link
-      rel="icon"
-      href="{{ url_for('static', path='/favicon.png') }}"
-      sizes="32x32"
-    />
-    <link
-      rel="icon"
-      href="{{ url_for('static', path='/favicon.png') }}"
-      sizes="192x192"
-    />
+    <link href="{{ url_for('static', path='/dist/styles.css') }}?cache4" rel="stylesheet" />
+    <link rel="icon" href="{{ url_for('static', path='/favicon.png') }}" sizes="32x32" />
+    <link rel="icon" href="{{ url_for('static', path='/favicon.png') }}" sizes="192x192" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta
       property="og:description"
@@ -41,18 +24,12 @@
     />
     <meta property="og:type" content="website" />
     <meta property="og:url" content="{{ request.url }}" />
-    <meta
-      property="og:image"
-      content="{{ url_for('static', path='/opengraph.png') }}"
-    />
+    <meta property="og:image" content="{{ url_for('static', path='/opengraph.png') }}" />
   </head>
 
   <body class="bg-gray-100 flex flex-col flex-wrap items-center min-h-screen">
     <div class="w-full">
-      <nav
-        id="navigation"
-        class="flex items-center justify-between p-2 sm:px-6 sm:mt-6 max-w-6xl mx-auto"
-      >
+      <nav id="navigation" class="flex items-center justify-between p-2 sm:px-6 sm:mt-6 max-w-6xl mx-auto">
         <a id="logo" href="/" class="mr-4" alt="Örflæði">
           <svg
             class="h-5 sm:h-6"
@@ -62,13 +39,7 @@
             xmlns="http://www.w3.org/2000/svg"
             xmlns:xlink="http://www.w3.org/1999/xlink"
           >
-            <g
-              id="örflæði-logo"
-              stroke="none"
-              stroke-width="1"
-              fill="none"
-              fill-rule="evenodd"
-            >
+            <g id="örflæði-logo" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
               <g id="Group" transform="translate(1.000000, 0.000000)">
                 <path
                   d="M7.94961815,21.552 C8.28561815,21.552 8.47761815,21.408 8.57361815,21.072 L11.6936182,11.376 L11.7896182,11.376 L14.8616182,21.072 C14.9576182,21.408 15.1496182,21.552 15.4856182,21.552 L23.0696182,21.552 C23.3576182,21.552 23.5016182,21.36 23.4056182,21.072 L15.6296182,0.672 C15.5336182,0.384 15.2936182,0.192 14.9576182,0.192 L8.47761815,0.192 C8.14161815,0.192 7.94961815,0.384 7.80561815,0.672 L0.0296181503,21.072 C-0.0663818497,21.36 0.0776181503,21.552 0.36561815,21.552 L7.94961815,21.552 Z"
@@ -165,10 +136,7 @@
         <div class="flex items-center">
           <div class="mr-1 sm:mr-6 whitespace-no-wrap flex items-center">
             <span class="hidden sm:flex mr-2 text-xs">Samstarf:</span>
-            <a
-              href="https://veldurafbil.is/"
-              class="px-3 sm:px-4 py-2 bg-gray-300 rounded-full"
-            >
+            <a href="https://veldurafbil.is/" class="px-3 sm:px-4 py-2 bg-gray-300 rounded-full">
               <svg
                 class="h-3"
                 viewBox="0 0 145 21"
@@ -176,13 +144,7 @@
                 xmlns="http://www.w3.org/2000/svg"
                 xmlns:xlink="http://www.w3.org/1999/xlink"
               >
-                <g
-                  id="Page-1"
-                  stroke="none"
-                  stroke-width="1"
-                  fill="none"
-                  fill-rule="evenodd"
-                >
+                <g id="Page-1" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
                   <g id="VelduRafbíl" fill="#000000" fill-rule="nonzero">
                     <polygon
                       id="Path"
@@ -236,35 +198,39 @@
           <a
             href="https://www.solberg.is/rafhjolaflokkar/"
             target="_blank"
-            class="font-bold inline-block text-sm px-3 sm:px-4 py-2 leading-none rounded shadow bg-white whitespace-no-wrap"
+            class="
+              font-bold
+              inline-block
+              text-sm
+              px-3
+              sm:px-4
+              py-2
+              leading-none
+              rounded
+              shadow
+              bg-white
+              whitespace-no-wrap
+            "
             >Um flokkana</a
           >
         </div>
       </nav>
     </div>
     <div class="flex-grow w-full">
-      <div class="max-w-6xl mx-auto">
-        {% block body %}{% endblock body %}
-      </div>
+      <div class="max-w-6xl mx-auto"> {% block body %}{% endblock body %} </div>
     </div>
     <footer class="bg-gray-900 w-full mt-8">
       <div class="mx-auto max-w-6xl px-4 py-8 sm:px-6 text-xs sm:text-sm">
         <p class="my-1 text-gray-600">
           Vefsíðan notar Scrapy til að safna upplýsingum frá vefsíðum verslana
         </p>
-        <p class="my-1 text-gray-600">
-          Þessi vefsíða notar ekki cookies og safnar engum persónugögnum
-        </p>
+        <p class="my-1 text-gray-600"> Þessi vefsíða notar ekki cookies og safnar engum persónugögnum </p>
         <p class="my-1 text-gray-600">
           Kóðinn af síðunni er á
-          <a href="https://github.com/jokull/orflaedi"
-            >github.com/jokull/orflaedi</a
-          >
+          <a href="https://github.com/jokull/orflaedi">github.com/jokull/orflaedi</a>
         </p>
         <p class="my-1 text-gray-600">
-          <a href="mailto:jokull@solberg.is" class="font-bold text-gray-500"
-            >jokull@solberg.is</a
-          >
+          <a href="mailto:jokull@solberg.is" class="font-bold text-gray-500">jokull@solberg.is</a>
         </p>
       </div>
     </footer>

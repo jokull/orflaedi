@@ -1,29 +1,24 @@
-from orflaedi.models import TagEnum
 import os
 
 import imgix
+import sqlalchemy as sa
 from fastapi import Depends, FastAPI, HTTPException
-from sqlalchemy.orm import Session
 from sqlalchemy import func, text
+from sqlalchemy.orm import Session
 from starlette.requests import Request
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
 
 from . import models
-from .database import SessionLocal, engine
-
-models.Base.metadata.create_all(bind=engine)
+from .database import session
 
 app = FastAPI()
 
 
 # Dependency
-def get_db():
-    try:
-        db = SessionLocal()
+async def get_db():
+    async with session() as db:
         yield db
-    finally:
-        db.close()
 
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -43,14 +38,15 @@ templates.env.globals["tag_enum"] = models.TagEnum
 templates.env.globals["DEBUG"] = os.getenv("DEBUG") == "true"
 
 
-def get_classification_counts(db):
+async def get_classification_counts(db):
+    counts_query_statement = (
+        sa.select(models.Model.classification, func.count(models.Model.id))
+        .where(models.Model.active == True)  # noqa
+        .group_by(models.Model.classification)
+    )
     counts = {
         key.value["short"]: value
-        for key, value in db.query(
-            models.Model.classification, func.count(models.Model.id)
-        )
-        .filter(models.Model.active == True)  # noqa
-        .group_by(models.Model.classification)
+        for key, value in (list((await db.execute(counts_query_statement))))
     }
 
     for enum in models.VehicleClassEnum:
@@ -58,40 +54,45 @@ def get_classification_counts(db):
     return counts
 
 
-def get_tag_counts(db):
+async def get_tag_counts(db):
     return {
-        TagEnum.__members__[tag]: count
-        for tag, count in db.execute(
-            text(
-                "select tags.tag, count(models.id) "
-                "from (select unnest(enum_range(NULL::tagenum)) as tag) as tags "
-                "left join models on tags.tag=ANY(models.tags) "
-                "where models.active = true "
-                "group by tags.tag "
-                "order by tags.tag"
+        models.TagEnum.__members__[tag]: count
+        for tag, count in (
+            await db.execute(
+                text(
+                    "select tags.tag, count(models.id) "
+                    "from (select unnest(enum_range(NULL::tagenum)) as tag) as tags "
+                    "left join models on tags.tag=ANY(models.tags) "
+                    "where models.active = true "
+                    "group by tags.tag "
+                    "order by tags.tag"
+                )
             )
         ).fetchall()
     }
 
 
-def get_retailer_counts(db, models_):
+async def get_retailer_counts(db, models_):
     sq = models_.subquery()
-    return (
-        db.query(models.Retailer, func.count(sq.c.id))
+    statement = (
+        sa.select((models.Retailer, func.count(sq.c.id)))
         .join(sq, models.Retailer.id == sq.c.retailer_id)
         .group_by(models.Retailer.id)
         .order_by(models.Retailer.name)
     )
+    return await db.execute(statement)
 
 
-def get_price_range_counts(db, models_):
+async def get_price_range_counts(db, statements):
     for i, (label, price_min, price_max) in enumerate(price_ranges):
-        q = models_
+        q = statements
         if price_min is not None:
-            q = q.filter(models.Model.price >= price_min)
+            q = q.where(models.Model.price >= price_min)
         if price_max is not None:
-            q = q.filter(models.Model.price <= price_max)
-        yield i, label, (price_min, price_max), q.count()
+            q = q.where(models.Model.price <= price_max)
+        yield i, label, (price_min, price_max), (
+            len(list(((await db.execute(q)).scalars())))
+        )
 
 
 # An inclusive range of integers for user friendly price categories
@@ -128,67 +129,87 @@ async def get_index(
     tag: str = None,
     admin: str = None,
 ):
-    models_ = db.query(models.Model).filter(
-        models.Model.active == True, ~(models.Model.image_url == None)  # noqa
+
+    statement = sa.select(models.Model).where(
+        models.Model.active == True, ~(models.Model.image_url == None)
     )
 
-    def filter_retailers(query):
+    def filter_retailers(statement):
         if verslun is None:
-            return query
-        return query.join(models.Retailer).filter(models.Retailer.slug == verslun)
+            return statement
+        return statement.join(models.Retailer).where(models.Retailer.slug == verslun)
 
-    def filter_price_range(query):
+    def filter_price_range(statement):
         if verdbil is None:
-            return query
+            return statement
         try:
             _, price_min, price_max = price_ranges[verdbil]
         except IndexError:
-            return query
+            return statement
         else:
             if price_min is not None:
-                query = query.filter(models.Model.price >= price_min)
+                statement = statement.where(models.Model.price >= price_min)
             if price_max is not None:
-                query = query.filter(models.Model.price <= price_max)
-        return query
+                statement = statement.where(models.Model.price <= price_max)
+        return statement
 
-    def filter_classification(query):
+    def filter_classification(statement):
         if flokkur is None:
-            return query
+            return statement
         vclass = getattr(models.VehicleClassEnum, flokkur)
         if vclass is not None:
             if vclass in lett_bifhjol_classes:
-                query = query.filter(
+                statement = statement.where(
                     models.Model.classification.in_(lett_bifhjol_classes)
                 )
             else:
-                query = query.filter(models.Model.classification == vclass)
-        return query
+                statement = statement.where(models.Model.classification == vclass)
+        return statement
 
-    def filter_tag(query):
+    def filter_tag(statement):
         if tag is None:
-            return query
-        if tag in TagEnum.__members__:
-            return query.filter(tag == models.Model.tags.any_())
-        return query
+            return statement
+        if tag in models.TagEnum.__members__:
+            return statement.where(tag == models.Model.tags.any_())
+        return statement
 
-    retailer_counts = get_retailer_counts(
-        db, filter_tag(filter_classification(filter_price_range(models_)))
+    retailer_counts = await get_retailer_counts(
+        db, filter_tag(filter_classification(filter_price_range(statement)))
     )
-    price_range_counts = get_price_range_counts(
-        db, filter_tag(filter_classification(filter_retailers(models_)))
-    )
-    classification_counts = get_classification_counts(db)
-    tag_counts = get_tag_counts(db)
 
-    models_ = filter_retailers(models_)
-    models_ = filter_price_range(models_)
-    models_ = filter_classification(models_)
-    models_ = filter_tag(models_)
+    price_statement = filter_tag(
+        filter_classification(
+            filter_retailers(
+                sa.select(models.Model.id).where(
+                    models.Model.active == True, ~(models.Model.image_url == None)
+                )
+            )
+        )
+    )
+
+    price_range_counts = [_ async for _ in get_price_range_counts(db, price_statement)]
+    classification_counts = await get_classification_counts(db)
+    tag_counts = await get_tag_counts(db)
+
+    statement = filter_retailers(statement)
+    statement = filter_price_range(statement)
+    statement = filter_classification(statement)
+    statement = filter_tag(statement)
 
     # Templates will expect value for all keys
 
-    tag_enum = getattr(TagEnum, tag) if tag else None
+    tag_enum = getattr(models.TagEnum, tag) if tag else None
     classification_enum = getattr(models.VehicleClassEnum, flokkur) if flokkur else None
+
+    _models = await db.execute(
+        statement.order_by(
+            models.Model.price, models.Model.make, models.Model.created.desc()
+        )
+    )
+
+    models_count = (
+        await db.execute(statement.with_only_columns(func.count()).order_by(None))
+    ).one()[0]
 
     return templates.TemplateResponse(
         "index.html",
@@ -200,7 +221,8 @@ async def get_index(
             "tag_counts": tag_counts,
             "retailer_counts": retailer_counts,
             "price_range_counts": price_range_counts,
-            "models": models_.order_by(models.Model.price, models.Model.created.desc()),
+            "models_count": models_count,
+            "models": _models.scalars(),
             "admin": bool(admin),
             "get_url_query": get_url_query,
         },
@@ -209,11 +231,10 @@ async def get_index(
 
 @app.get("/hjol/{id}")
 async def get_model(request: Request, id: int, db: Session = Depends(get_db)):
-    model = (
-        db.query(models.Model)
-        .filter(models.Model.active == True, models.Model.id == id)
-        .first()
+    statement = sa.select(models.Model).where(
+        models.Model.active == True, models.Model.id == id
     )
+    model = (await db.execute(statement)).scalars().first()
     if model is None:
         raise HTTPException(status_code=404, detail="Model not found")
     return templates.TemplateResponse(
@@ -221,22 +242,23 @@ async def get_model(request: Request, id: int, db: Session = Depends(get_db)):
         {
             "request": request,
             "model": model,
-            "classification_counts": get_classification_counts(db),
+            "classification_counts": await get_classification_counts(db),
         },
     )
 
 
 @app.post("/models/{id}/tags/{tag}")
 async def add_tag(request: Request, tag: str, id: int, db: Session = Depends(get_db)):
-    model = db.query(models.Model).get(id)
-    if model is None or tag not in TagEnum.__members__:
+    statement = sa.select(models.Model).where(models.Model.id == id)
+    model = (await db.execute(statement)).scalars().first()
+    if model is None or tag not in models.TagEnum.__members__:
         raise HTTPException(status_code=404, detail="Model not found")
-    _tag = TagEnum.__members__[tag]
+    _tag = models.TagEnum.__members__[tag]
     model.tags = model.tags or []
     if _tag not in model.tags:
         model.tags = list(model.tags) + [_tag]
         db.add(model)
-        db.commit()
+        await db.commit()
     return {}
 
 
@@ -244,15 +266,16 @@ async def add_tag(request: Request, tag: str, id: int, db: Session = Depends(get
 async def remove_tag(
     request: Request, tag: str, id: int, db: Session = Depends(get_db)
 ):
-    model = db.query(models.Model).get(id)
-    if model is None or tag not in TagEnum.__members__:
+    statement = sa.select(models.Model).where(models.Model.id == id)
+    model = (await db.execute(statement)).scalars().first()
+    if model is None or tag not in models.TagEnum.__members__:
         raise HTTPException(status_code=404, detail="Model not found")
-    _tag = TagEnum.__members__[tag]
+    _tag = models.TagEnum.__members__[tag]
     model.tags = model.tags or []
     if _tag in model.tags:
         tags = list(model.tags)
         tags.remove(_tag)
         model.tags = tags
         db.add(model)
-        db.commit()
+        await db.commit()
     return {}

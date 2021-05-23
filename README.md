@@ -11,7 +11,7 @@ In another tab
 
 ```bash
 > poetry install
-> poetry run uvicorn main:app --reload
+> poetry run uvicorn orflaedi.main:app --reload
 ```
 
 Use something like this for black formating in a `.vscode/settings.json` file.

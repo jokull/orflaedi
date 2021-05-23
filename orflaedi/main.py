@@ -106,8 +106,6 @@ price_ranges = (
     ("Yfir 700 þ.kr.", 700_000, None),
 )
 
-lett_bifhjol_classes = (models.VehicleClassEnum.lb_1, models.VehicleClassEnum.lb_2)
-
 
 def get_url_query(request: Request, **kwargs):
     query = dict(request.query_params)
@@ -158,9 +156,10 @@ async def get_index(
             return statement
         vclass = getattr(models.VehicleClassEnum, flokkur)
         if vclass is not None:
-            if vclass in lett_bifhjol_classes:
+            if vclass in (models.VehicleClassEnum.lb_1, models.VehicleClassEnum.lb_2):
                 statement = statement.where(
-                    models.Model.classification.in_(lett_bifhjol_classes)
+                    (models.Model.classification == models.VehicleClassEnum.lb_1)
+                    | (models.Model.classification == models.VehicleClassEnum.lb_2)
                 )
             else:
                 statement = statement.where(models.Model.classification == vclass)
@@ -170,7 +169,7 @@ async def get_index(
         if tag is None:
             return statement
         if tag in models.TagEnum.__members__:
-            return statement.where(tag == models.Model.tags.any_())
+            return statement.where(sa.text(f"'{tag}' = ANY (models.tags)"))
         return statement
 
     retailer_counts = await get_retailer_counts(
@@ -208,7 +207,11 @@ async def get_index(
     )
 
     models_count = (
-        await db.execute(statement.with_only_columns(func.count()).order_by(None))
+        await db.execute(
+            statement.select_from(models.Model)
+            .with_only_columns(func.count())
+            .order_by(None)
+        )
     ).one()[0]
 
     return templates.TemplateResponse(

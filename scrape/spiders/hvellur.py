@@ -9,20 +9,38 @@ class HvellurSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        for product in response.css(".product a.product-image-link"):
-            yield response.follow(product, self.parse_product)
+        for product in response.css(".product-grid-item"):
+            price = int("".join(product.css(".woocommerce-Price-amount ::text").re("\d+")))
+            if price > 100000:
+                link = product.css(".product-element-top a")[0]
+                yield response.follow(link, self.parse_product, cb_kwargs={"price": price})
 
-    def parse_product(self, response):
+    def parse_product(self, response, price):
 
         sku = response.css(".single-product-page::attr('id')").re(r"product-(\d+)")[0]
         make, name = response.css(".product_title::text").get().split(" ", 1)
 
-        if "rafhjól" not in name.lower():
-            return None
+        stripwords = [
+            "svart",
+            "hvítt",
+            "blátt",
+            "gult",
+            "rautt",
+            "blátt",
+            "brúnt",
+            "grátt",
+            "17.5ah",
+            "36v",
+            "ebike",
+            "rafhlaupahjól",
+            "rafhjól",
+            "fjallarafhjól",
+            "rafmagnshjól",
+        ]
+
+        name = " ".join(w for w in name.split() if w.lower() not in stripwords)
 
         image_url = response.css(".product-image-wrap a::attr('href')").get()
-        price_el = response.css(".entry-summary .price .woocommerce-Price-amount::text")
-        price = int("".join(price_el.re(r"\d+")))
 
         yield {
             "sku": sku,

@@ -5,7 +5,8 @@ class KriaSpider(scrapy.Spider):
     name = "kria"
 
     start_urls = [
-        "https://kriacycles.com/product-category/bikes/turbo-e-bikes/",
+        "https://kriahjol.is/product-category/bikes/rafhjol/",
+        "https://kriahjol.is/product-category/bikes/rafhjol/page/2/",
     ]
 
     def parse(self, response):
@@ -23,7 +24,7 @@ class KriaSpider(scrapy.Spider):
         price = int("".join(price_el[0].re(r"\d+")))
         if price < 30_000:
             return
-            
+
         image_url = response.css(".item_slick::attr(href)").get()
         sku = response.xpath("//meta[@property='og:url']").css("::attr(content)").get()
 

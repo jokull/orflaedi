@@ -1,7 +1,6 @@
 import os
 
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
-from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import sessionmaker
 
 SQLALCHEMY_DATABASE_URL = os.environ.get(
@@ -16,5 +15,3 @@ session = sessionmaker(
     bind=engine,
     class_=AsyncSession,
 )
-
-Base = declarative_base()

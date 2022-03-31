@@ -10,9 +10,8 @@ Prints a migration script and offers to run it, if there is a diff.
 
 """
 
-import os
-
 import typer
+from sqlalchemy import create_engine
 from migra import Migration
 
 
@@ -20,10 +19,10 @@ def sync(DB_URL: str = "postgresql://orflaedi:@localhost/orflaedi"):
     from sqlbag import S, temporary_database as temporary_db
 
     with temporary_db() as TEMP_DB_URL:
-        os.environ["DATABASE_URL"] = TEMP_DB_URL
-        from orflaedi.database import engine, Base
+        from orflaedi.database import Base
         from orflaedi.models import Model, Retailer, VehicleClassEnum, TagEnum
 
+        engine = create_engine(TEMP_DB_URL)
         Base.metadata.create_all(engine)
 
         with S(DB_URL) as s_current, S(TEMP_DB_URL) as s_target:

@@ -16,14 +16,15 @@ class BerlinSpider(scrapy.Spider):
 
         price = int("".join(response.css(".money::text")[0].re(r"\d+")))
         sku = response.css(".product-single::attr('class')").re(r"product-(\d+)")[0]
+        image_url = response.css(".product-single__photo__img::attr('data-pswp-src')").get()
+        if image_url.startswith("//"):
+            image_url = "https:" + image_url
 
         yield {
             "sku": sku,
             "name": response.css(".section__title-text::text").get(),
             "make": response.css("h4.section__title-desc a::text").get(),
             "price": price,
-            "file_urls": [
-                response.css(".product-single__photo__img::attr('data-pswp-src')").get()
-            ],
+            "file_urls": [image_url],
             "scrape_url": response.url,
         }

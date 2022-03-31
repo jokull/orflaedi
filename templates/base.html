@@ -198,19 +198,7 @@
           <a
             href="https://www.solberg.is/rafhjolaflokkar/"
             target="_blank"
-            class="
-              font-bold
-              inline-block
-              text-sm
-              px-3
-              sm:px-4
-              py-2
-              leading-none
-              rounded
-              shadow
-              bg-white
-              whitespace-no-wrap
-            "
+            class="font-bold inline-block text-sm px-3 sm:px-4 py-2 leading-none rounded shadow bg-white whitespace-no-wrap"
             >Um flokkana</a
           >
         </div>
@@ -235,6 +223,6 @@
       </div>
     </footer>
     {% include "fathom.html" %}
-    <script src="{{ url_for('static', path='/dist/app.js') }}"></script>
+    <script type="module" src="{{ url_for('static', path='/dist/app.js') }}"></script>
   </body>
 </html>

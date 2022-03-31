@@ -1,5 +1,5 @@
-import re
 import enum
+import re
 
 from sqlalchemy import (
     Boolean,
@@ -10,13 +10,14 @@ from sqlalchemy import (
     Integer,
     String,
     TypeDecorator,
-    func,
     cast,
+    func,
 )
 from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy.orm import relationship
 
-from .database import Base
+Base = declarative_base()
 
 
 class ArrayOfEnum(TypeDecorator):

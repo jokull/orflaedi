@@ -1,0 +1,9 @@
+services:
+  scrapy:
+    build: .
+    stdin_open: true
+    tty: true
+    volumes:
+      - .:/code
+volumes:
+  code:

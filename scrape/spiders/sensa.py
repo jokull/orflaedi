@@ -13,19 +13,24 @@ class SensaSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        for product in response.css("._3g8J4 a._34sIs"):
+        for product in response.css("ul._3g4hn ._3DNsL>a"):
             yield response.follow(product, self.parse_product)
 
     def parse_product(self, response):
         name = response.css("._2qrJF::text").get()
-        price = int("".join(response.css("._2sFaY span::text").re(r"\d+")))
-        image_url = response.css("._1oSdp::attr(style)").re_first(r"url\(([^\)]+)")
+        price = int("".join(response.css("._2POY8 span::text").re(r"\d+")))
+        image_url = response.css(".media-wrapper-hook::attr(href)").get()
         sku = response.url
+
+        make = "Sensa"
+        if name.startswith("PINARELLO"):
+            name = name[len("PINARELLO") :]
+            make = "Pinarello"
 
         yield {
             "sku": sku,
             "name": name,
-            "make": "Sensa",
+            "make": make,
             "price": price,
             "file_urls": [image_url],
             "scrape_url": response.url,

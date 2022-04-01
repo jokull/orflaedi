@@ -199,13 +199,15 @@
       </div>
       <a class="block p-3" href="{{ model.scrape_url }}" target="_blank">
         <div class="font-bold uppercase text-gray-600 text-xs tracking-wider leading-tight">
-          {{ model.make }}
+          {{ model.admin_make or model.make }}
         </div>
-        <div title="{{ model.name }}" class="name font-bold text-xl"> {{ model.name }} </div>
+        <div title="{{ model.admin_name or model.name }}" class="name font-bold text-xl">
+          {{ model.admin_name or model.name }}
+        </div>
         <div class="flex justify-between align-middle">
           <p class="text-base whitespace-no-wrap mr-2">
-            {% if model.price %} {{ "{:,.0f}".format(model.price).replace(",", ".") }} kr {% else %} - kr {%
-            endif %}
+            {% if model.admin_price or model.price %} {{ "{:,.0f}".format(model.admin_price or
+            model.price).replace(",", ".") }} kr {% else %} - kr {% endif %}
           </p>
           <div class="retailer text-gray-700 truncate" alt="{{ model.retailer.name }}">
             {{ model.retailer.name }}

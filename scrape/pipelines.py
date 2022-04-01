@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 
 from scrapy.utils.project import get_project_settings
 
-from orflaedi.models import Model, Retailer
+from orflaedi.models import Model, Retailer, VehicleClassEnum
 
 
 def get_or_create_retailer(db, slug):
@@ -55,26 +55,23 @@ class DatabasePipeline(object):
         )
         if model is None:
             model = Model(retailer=self.retailer, sku=item["sku"])
-            # Name and make can have been tweaked after scraping by editors so
-            # don’t overwrite
-            model.name = item["name"]
-            model.make = item.get("make")
+        model.name = item["name"]
+        model.make = item.get("make") or model.make
         model.last_scraped = dt.datetime.utcnow()
         model.scrape_url = item["scrape_url"]
         model.price = item["price"]
         model.image_url = len(item["file_urls"]) and item["file_urls"][0] or None
         model.active = True
         model.name = model.name or item.get("name")
-        if not model.make:
-            model.make = item.get("make") or ""
         if not model.motor_model:
             model.motor_model = item.get("motor_model") or None
         if model.name and model.make:
             if model.name.startswith(model.make):
                 model.name = model.name[len(model.make) :]
         model.name = model.name.strip()
-        if item.get("classification"):
-            model.classification = item["classification"]
+        model.classification = item.get(
+            "classification", model.classification or VehicleClassEnum.bike_b
+        )
         self.db.add(model)
         self.db.commit()
         self.scraped_skus.add(item["sku"])

@@ -80,6 +80,12 @@ class Model(Base):
     make = Column(String, default=None)
     classification = Column(Enum(VehicleClassEnum), default=VehicleClassEnum.bike_b)
     price = Column(Integer, nullable=True)
+
+    # Allow admin to overwrite
+    admin_name = Column(String, nullable=True)
+    admin_make = Column(String, nullable=True)
+    admin_price = Column(Integer, nullable=True)
+
     weight = Column(Integer, nullable=True)
     year = Column(Integer, nullable=True)
     motor_model = Column(String, nullable=True)

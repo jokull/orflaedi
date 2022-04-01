@@ -19,8 +19,7 @@ def sync(DB_URL: str = "postgresql://orflaedi:@localhost/orflaedi"):
     from sqlbag import S, temporary_database as temporary_db
 
     with temporary_db() as TEMP_DB_URL:
-        from orflaedi.database import Base
-        from orflaedi.models import Model, Retailer, VehicleClassEnum, TagEnum
+        from orflaedi.models import Base, Model, Retailer, VehicleClassEnum, TagEnum
 
         engine = create_engine(TEMP_DB_URL)
         Base.metadata.create_all(engine)

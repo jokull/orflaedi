@@ -14,7 +14,7 @@ class RafmagnshjolSpider(scrapy.Spider):
 
     def parse_product(self, response):
 
-        price_element = response.css(".woocommerce-Price-amount::text")
+        price_element = response.css(".woocommerce-Price-amount bdi::text")[0]
         if price_element:
             price = int("".join(price_element.re(r"\d+")))
         else:
@@ -28,9 +28,7 @@ class RafmagnshjolSpider(scrapy.Spider):
             "make": "QWIC",
             "price": price,
             "file_urls": [
-                response.css(
-                    ".woocommerce-product-gallery__wrapper a::attr(href)"
-                ).get()
+                response.css(".woocommerce-product-gallery__image img::attr('data-src')")[0].get()
             ],
             "scrape_url": response.url,
         }

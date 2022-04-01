@@ -88,7 +88,7 @@
 }
 
 .picker ul li {
-  @apply mb-2 pb-2 text-xs;
+  @apply pb-2 text-xs;
 }
 
 @screen sm {

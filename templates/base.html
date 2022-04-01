@@ -11,10 +11,8 @@
     {% else -%}
     <title>Örflæði: Öll rafhjól og hlaupahjól á einum stað</title>
     <meta property="og:title" content="Örflæði.is" />
-    {% endif -%} {% if DEBUG -%}
-    <link href="https://unpkg.com/tailwindcss@^1.0/dist/tailwind.min.css" rel="stylesheet" />
     {% endif -%}
-    <link href="{{ url_for('static', path='/dist/styles.css') }}?cache4" rel="stylesheet" />
+    <link href="{{ url_for('static', path='/dist/styles.css') }}" rel="stylesheet" />
     <link rel="icon" href="{{ url_for('static', path='/favicon.png') }}" sizes="32x32" />
     <link rel="icon" href="{{ url_for('static', path='/favicon.png') }}" sizes="192x192" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />

@@ -357,6 +357,10 @@ img, video {
   width: 100%;
 }
 
+.w-4 {
+  width: 1rem;
+}
+
 .max-w-6xl {
   max-width: 72rem;
 }
@@ -390,8 +394,24 @@ img, video {
   justify-content: space-between;
 }
 
+.gap-4 {
+  gap: 1rem;
+}
+
 .gap-2 {
   gap: .5rem;
+}
+
+.gap-x-2 {
+  column-gap: .5rem;
+}
+
+.gap-y-2 {
+  row-gap: .5rem;
+}
+
+.gap-x-4 {
+  column-gap: 1rem;
 }
 
 .overflow-hidden {
@@ -666,7 +686,6 @@ img, video {
 }
 
 .picker ul li {
-  margin-bottom: .5rem;
   padding-bottom: .5rem;
   font-size: .75rem;
   line-height: 1rem;

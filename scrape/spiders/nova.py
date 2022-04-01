@@ -29,15 +29,14 @@ class NovaSpider(scrapy.Spider):
         make = response.css("._1A6KQNOkFI::text").get().title()
         image_url = response.css("._2l8kk3sVj1::attr('src')").get()
         image_url = get_original_image_url(image_url)
-        price = int(
-            "".join(response.css(".OptionPrice_optionPrice_34JZ4::text").re(r"\d+"))
-        )
+        price = int("".join(response.css(".OptionPrice__optionPrice___2qA1G::text").re(r"\d+")))
 
-        yield {
-            "sku": sku,
-            "name": name,
-            "make": make,
-            "price": price,
-            "file_urls": [image_url],
-            "scrape_url": response.url,
-        }
+        if price > 20_000:
+            yield {
+                "sku": sku,
+                "name": name,
+                "make": make,
+                "price": price,
+                "file_urls": [image_url],
+                "scrape_url": response.url,
+            }

@@ -1,3 +1,5 @@
+@import "./app.css";
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
@@ -86,7 +88,7 @@
 }
 
 .picker ul li {
-  @apply mb-2 pb-2 text-xs;
+  @apply pb-2 text-xs;
 }
 
 @screen sm {
@@ -156,5 +158,3 @@
 .image .tags {
   bottom: 0;
 }
-
-@import "./app.css";

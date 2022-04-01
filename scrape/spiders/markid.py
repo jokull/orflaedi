@@ -5,30 +5,26 @@ class MarkidSpider(scrapy.Spider):
     name = "markid"
 
     start_urls = [
-        "https://markid.is/voruflokkur/scott-hjol/rafmagnshjol/?v=0bfc16cc12ef",
+        "https://markid.is/collections/scott-hjol-rafmagnshjol",
     ]
 
     def parse(self, response):
-        for link in response.css(".product>a"):
+        for link in response.css(".product-item>a"):
             yield response.follow(link, self.parse_product)
 
     def parse_product(self, response):
 
-        sku = response.css(".product::attr('class')").re(r"post-(\d+)")[0]
-        make, name = response.css(".entry-title::text").get().title().split(" ", 1)
-        image_url, _ = (
-            response.css(".woocommerce-product-gallery__wrapper a::attr(href)")
-            .get()
-            .split("?", 1)
-        )
+        name = response.css(".product-meta__title::text").get()
+        make = response.css(".product-meta__vendor::text").get()
+        image_url = "https:" + response.css(".product-gallery__image::attr('data-zoom')").get()
 
-        price_el = response.css(".price bdi::text")[0]
+        price = int("".join(response.css(".price").re(r"\d")))
 
         yield {
-            "sku": sku,
+            "sku": response.url.rsplit("/", 1)[-1],
             "name": name,
             "make": make,
-            "price": int("".join(price_el.re(r'\d'))),
+            "price": price,
             "file_urls": [image_url],
             "scrape_url": response.url,
         }

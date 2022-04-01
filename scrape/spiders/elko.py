@@ -43,50 +43,33 @@ class ElkoSpider(scrapy.Spider):
     name = "elko"
 
     start_urls = [
-        "https://elko.is/ahugamal/svifbretti-og-hlaupahjol",
-        "https://elko.is/ahugamal/lett-bifhjol",
+        "https://elko.is/voruflokkar/farartaeki-339?categories=188",
+        "https://elko.is/voruflokkar/lett-bifhjol-287",
     ]
 
     def parse(self, response):
-        products_without_color = set()
-        for link in response.css(".products-grid .product-name a"):
-            name = link.css("::text").get()
-            name, _ = get_name_and_color(name)
-            if name.lower() in products_without_color:
-                continue
-            products_without_color.add(name.lower())
-            if (
-                response.url == "https://elko.is/ahugamal/svifbretti-og-hlaupahjol"
-                and any(skipword in name for skipword in skipwords)
-            ):
-                # Filter out accessories from this page
-                continue
+        for link in response.css(".fpJyEp a"):
             yield response.follow(link, self.parse_product)
 
     def parse_product(self, response):
 
-        sku = response.css(".product-page .product-code::text").get().strip()
-        price = int(
-            "".join(response.css(".product-page .product-price::text").re(r"\d+"))
-        )
+        make, name = response.css("h1::text").get().split(" ", 1)
+        if " - " in name:
+            name = name.split(" - ", 1)[0]
+
+        sku = response.css(".bbyYtt::text").get().strip()
+
+        price = int("".join(response.css(".doQNfU::text").re(r"\d+")))
 
         if price < 10000:
             return None
 
-        file_urls = [response.css(".big-image img::attr(data-lazy-src)").get()]
-        name = response.css(".product-page .product-name::text").get().strip()
-        name, _ = get_name_and_color(name)
-        name, classification = get_clean_name_and_classification(name)
-
-        make = (
-            response.css(".tab-pane .table")
-            .xpath("//tr[td='Framleiðandi']/td[2]/text()")
-            .get()
-            .strip()
+        file_urls = [response.css(".slick-slide .sc-e8985f8b-8::attr('src')")[0].get()]
+        classification = (
+            VehicleClassEnum.bike_c
+            if (response.css(".eyHLkH ::text")[2].get() == "Hlaupahjól")
+            else VehicleClassEnum.lb_2
         )
-
-        if make == "Swagtron":
-            name = sku
 
         yield {
             "sku": sku,

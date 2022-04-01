@@ -10,32 +10,21 @@ class EverestSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        for row in response.css(".singleImage"):
-            image_url = response.urljoin(row.css("a::attr('href')").get())
-            make = row.css("h2 strong::text").get()
-            name = row.css("h2::text").get().strip()
-            name_el, description_el, price_el = row.css(".description>*")
+        for row in response.css(".products .product"):
+            image_url = response.urljoin(row.css("a img::attr('src')").get())
+            make, name = row.css("h3 a span::text").get().split(" ", 1)
 
-            price = "".join(price_el.css("::text").re(r"\d+"))
+            price = "".join(row.css(".price span.n::text").re(r"\d+"))
             if not price:
                 continue
             price = int(price)
 
-            motor_model = None
-            for list_item in description_el.css("::text").getall():
-                if ": " not in list_item:
-                    continue
-                key, value = list_item.split(": ", 1)
-                if key == "Mótor":
-                    motor_model = value
-
-            sku = name
+            sku = row.css("a::attr('href')").get()
 
             yield {
                 "sku": sku,
                 "make": make,
                 "name": name,
-                "motor_model": motor_model,
                 "price": price,
                 "file_urls": [image_url],
                 "scrape_url": response.url,

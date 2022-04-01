@@ -9,51 +9,34 @@ class EllingsenSpider(scrapy.Spider):
     name = "ellingsen"
 
     start_urls = [
-        "https://rafhjolasetur.is/collections/rafhjol",
-        "https://rafhjolasetur.is/collections/rafhlaupahjol",
+        "https://s4s.is/rafhjolasetrid/rafhjol/fjoelskyldurafhjol",
+        "https://s4s.is/rafhjolasetrid/rafhjol/fjallahjol/merida",
+        "https://s4s.is/rafhjolasetrid/rafhjol/borgarhjol",
+        "https://s4s.is/rafhjolasetrid/rafhlaupahjol/oell-rafhlaupahjol",
     ]
 
     def parse(self, response):
         is_class_c = "rafhlaupahjol" in response.url
-        print(is_class_c, response.url)
-        for el in response.css(".collection-matrix .product-wrap"):
+        for el in response.css(".productCard a"):
             yield response.follow(
-                el.css("a::attr(href)")[1],
-                self.parse_product,
-                cb_kwargs={"is_class_c": is_class_c},
+                el, self.parse_product, cb_kwargs={"is_class_c": is_class_c},
             )
 
     def parse_product(self, response, is_class_c):
 
-        classification = (
-            VehicleClassEnum.bike_c if is_class_c else VehicleClassEnum.bike_b
-        )
-
-        print(is_class_c, classification)
+        classification = VehicleClassEnum.bike_c if is_class_c else VehicleClassEnum.bike_b
 
         file_urls = [
-            "https:"
-            + response.css(".product-gallery__container .lazyloaded::attr(src)")
+            response.css(".productImage::attr(src)")
             .get()
-            .replace("_1200x", "_5000x")
+            .replace("855", "5000")
+            .replace("925", "5000")
         ]
 
-        obj = None
-
-        for script_tag in response.css("script::text").getall():
-            if "var meta = " in script_tag:
-                _, obj = script_tag.split("var meta = ")
-                obj, _ = obj.split(";", 1)
-                obj = json.loads(obj)
-
-        if obj is None:
-            print("NO OBJ!")
-            return None
-
-        sku = str(obj["product"]["id"])
-        make = obj["product"]["vendor"]
-        price = int(obj["product"]["variants"][0]["price"] / 100)
-        name = obj["product"]["variants"][0]["name"]
+        sku = response.css(".productNumber::text").get()
+        make = response.css(".productBrand::text").get()
+        price = int("".join(response.css(".productPrice::text").re("\d+")))
+        name = response.css(".productName::text").get()
 
         if make == "Riese & Muller":
             make = "Riese & Müller"

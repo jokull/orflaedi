@@ -7,8 +7,10 @@
   "license": "ISC",
   "scripts": {
     "clean": "rm -rf static/dist/",
-    "build": "parcel build frontend/app.js frontend/styles.css --dist-dir static/dist/ --public-url /static/dist/",
-    "watch": "parcel watch frontend/app.js frontend/styles.css --dist-dir static/dist/ --public-url /static/dist/"
+    "dev:styles": "tailwindcss -i ./frontend/styles.css -o ./static/dist/styles.css --watch",
+    "build:styles": "NODE_ENV=production tailwindcss -i ./frontend/styles.css -o ./static/dist/styles.css",
+    "build": "npm run build:styles && parcel build frontend/app.js --dist-dir static/dist/ --public-url /static/dist/",
+    "watch": "parcel watch frontend/app.js --dist-dir static/dist/ --public-url /static/dist/"
   },
   "browserslist": "> 0.25%, not dead",
   "dependencies": {

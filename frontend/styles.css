@@ -1,11 +1,13 @@
-@import "./app.css";
-
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
+body {
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue;
+}
+
 #logo svg:hover .letter {
-  fill: blue;
+  @apply fill-blue-600;
 }
 
 .pickers li {
@@ -35,24 +37,6 @@
   .bikes {
     grid-template-columns: repeat(4, 1fr);
   }
-}
-
-.model-tri {
-  background: #000;
-}
-
-.model-tri .name,
-.model-tri p {
-  color: rgba(255, 255, 255, 1);
-}
-
-.model-tri .text-gray-600 {
-  color: rgba(255, 255, 255, 0.6);
-}
-
-.model-tri .retailer {
-  color: rgba(244, 151, 56, 1);
-  font-weight: bold;
 }
 
 .bikes .name {

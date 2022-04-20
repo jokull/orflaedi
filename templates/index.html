@@ -1,7 +1,7 @@
 {% extends "base.html" %} {% block body %}
 <div class="sm:px-6">
   {% if not request.query_params.keys() %}
-  <div class="welcome my-16 mx-auto max-w-7xl px-4 sm:my-24 sm:px-6">
+  <div class="welcome my-16 mx-auto px-4 sm:my-24 sm:px-6">
     <div class="text-center">
       <h1 class="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
         Öll rafhjól á Íslandi <br />
@@ -172,18 +172,16 @@
   </div>
   <div class="bikes grid grid-cols-1 gap-2 sm:gap-4 mx-2 sm:mx-0">
     {% for model in models %}
-    <div
-      class="model model-{{ model.retailer.slug }} rounded sm:rounded-md overflow-hidden shadow md:shadow-md sm:mb-1"
-    >
+    <div class="model model-{{ model.retailer.slug }} rounded sm:rounded-md overflow-hidden sm:mb-1 bg-white">
       <div class="image relative">
         <a href="{{ model.scrape_url }}" target="_blank" class="w-full">
           <img
-            class="w-full bg-white object-contain h-40 sm:h-40 p-2 lazyload"
+            class="w-full bg-white object-contain aspect-video max-h-40 md:max-h-64 p-2 lazyload"
             data-src="{{ imgix_url(model.image_url, {'trim':'color', 'trim-tol': '20', 'auto':'format,compress', 'w':'400'}) }}"
             data-srcset="{{ imgix_url(model.image_url, {'trim':'color', 'trim-tol': '20', 'auto':'format,compress', 'w':'400'}) }} 1x,
                         {{ imgix_url(model.image_url, {'trim':'color', 'trim-tol': '20', 'auto':'format,compress', 'w':'400', 'dpr': '2'}) }} 2x,
                         {{ imgix_url(model.image_url, {'trim':'color', 'trim-tol': '20', 'auto':'format,compress', 'w':'400', 'dpr': '3'}) }} 3x"
-            alt="Image of {{ model.name }}"
+            alt="{{ model.name }}"
           />
         </a>
         <div class="tags absolute w-full px-3 text-right">
@@ -198,21 +196,19 @@
           {% endfor %} {% endif %}
         </div>
       </div>
-      <a class="block p-3" href="{{ model.scrape_url }}" target="_blank">
+      <a class="block p-3 border-t border-t-black/5" href="{{ model.scrape_url }}" target="_blank">
         <div class="font-bold uppercase text-gray-600 text-xs tracking-wider leading-tight">
-          {{ model.admin_make or model.make }}
+          {{ model.admin_make or model.make or "&nbsp;"|safe }}
         </div>
         <div title="{{ model.admin_name or model.name }}" class="name font-bold text-xl">
-          {{ model.admin_name or model.name }}
+          {{ model.admin_name or model.name or "&nbsp;"|safe }}
         </div>
-        <div class="flex justify-between align-middle">
-          <p class="text-base whitespace-no-wrap mr-2">
+        <div class="flex justify-between align-middle text-sm text-gray-700">
+          <p class="whitespace-no-wrap mr-2">
             {% if model.admin_price or model.price %} {{ "{:,.0f}".format(model.admin_price or
             model.price).replace(",", ".") }} kr {% else %} - kr {% endif %}
           </p>
-          <div class="retailer text-gray-700 truncate" alt="{{ model.retailer.name }}">
-            {{ model.retailer.name }}
-          </div>
+          <div class="retailer truncate" alt="{{ model.retailer.name }}"> {{ model.retailer.name }} </div>
         </div>
       </a>
     </div>

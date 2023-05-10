@@ -1,10 +1,10 @@
 # Development
 
-You will need yarn, Poetry installed and Postgres running locally
+You will need pnpm, Poetry installed and Postgres running locally
 
 ```bash
-> yarn
-> yarn run watch
+> pnpm
+> pnpm run watch
 ```
 
 In another tab
@@ -12,6 +12,13 @@ In another tab
 ```bash
 > poetry install
 > poetry run uvicorn orflaedi.main:app --reload
+```
+
+Drop into a Fish shell in the Docker
+
+```bash
+docker compose up --build -d
+docker exec -it db1eead29953 fish
 ```
 
 Use something like this for black formating in a `.vscode/settings.json` file.

@@ -47,7 +47,7 @@ class GastecSpider(scrapy.Spider):
 
         name = " ".join(w for w in name.split() if w.lower() not in stripwords)
 
-        make = make.strip()
+        make = make.strip() if make else ""
 
         if "urbanbiker" in make.lower() or not make.strip():
             make = "Urbanbiker"

@@ -13,12 +13,12 @@ class SensaSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        for product in response.css("ul._3g4hn ._3DNsL>a"):
+        for product in response.css("ul.uQ5Uah li a"):
             yield response.follow(product, self.parse_product)
 
     def parse_product(self, response):
         name = response.css("._2qrJF::text").get()
-        price = int("".join(response.css("._2POY8 span::text").re(r"\d+")))
+        price = int("".join(response.css("._2POY8 [data-hook=\"formatted-primary-price\"]::text").re(r"\d+")))
         image_url = response.css(".media-wrapper-hook::attr(href)").get()
         sku = response.url
 

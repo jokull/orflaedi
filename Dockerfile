@@ -16,7 +16,7 @@ ENV SHELL /usr/bin/fish
 
 # install dependencies
 RUN pip install -r requirements.txt --no-cache-dir
-RUN pip install scrapy==2.4.1 shub
+RUN pip install scrapy==2.6.3 shub
 
 # copy the content of the local src directory to the working directory
 VOLUME ["/code"]

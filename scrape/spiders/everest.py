@@ -14,7 +14,7 @@ class EverestSpider(scrapy.Spider):
             image_url = response.urljoin(row.css("a img::attr('src')").get())
             make, name = row.css("h3 a span::text").get().split(" ", 1)
 
-            price = "".join(row.css(".price span.n::text").re(r"\d+"))
+            price = "".join(row.css(".priceDiff>.price span.n::text").re(r"\d+"))
             if not price:
                 continue
             price = int(price)

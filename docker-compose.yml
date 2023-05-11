@@ -1,9 +1,15 @@
 services:
+  web:
+    build:
+      context: .
+      dockerfile: Dockerfile.web
+    ports:
+      - "8000:80"
+    volumes:
+      - .:/code
   scrapy:
     build: .
     stdin_open: true
     tty: true
     volumes:
       - .:/code
-volumes:
-  code:

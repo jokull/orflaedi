@@ -14,6 +14,9 @@ RUN chsh -s /usr/bin/fish
 SHELL ["fish", "--command"]
 ENV SHELL /usr/bin/fish
 
+RUN pip install poetry
+RUN poetry config virtualenvs.create false
+
 # install dependencies
 RUN pip install -r requirements.txt --no-cache-dir
 RUN pip install scrapy==2.6.3 shub

@@ -6,10 +6,10 @@ specifiers:
   '@fullhuman/postcss-purgecss': ^2.1.0
   autoprefixer: ^9.7.4
   lazysizes: ^5.2.0
-  parcel: ^2.4.0
+  parcel: ^2.8.3
   postcss: ^8.4.12
-  prettier: ^2.3.0
-  tailwindcss: ^3.0.23
+  prettier: ^2.8.8
+  tailwindcss: ^3.3.2
 
 dependencies:
   lazysizes: 5.3.2

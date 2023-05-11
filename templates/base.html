@@ -8,6 +8,9 @@
     {% elif classification -%}
     <title>{{ classification.value['long'] }} - Örflæði</title>
     <meta property="og:title" content="{{ classification.value['long'] }} - Örflæði" />
+    {% elif retailer -%}
+    <title>{{ retailer.name }} - Örflæði</title>
+    <meta property="og:title" content="{{ retailer.name }} - Örflæði" />
     {% else -%}
     <title>Örflæði: Öll rafhjól og hlaupahjól á einum stað</title>
     <meta property="og:title" content="Örflæði.is" />

@@ -90,9 +90,7 @@ async def get_price_range_counts(db, statements):
             q = q.where(models.Model.price >= price_min)
         if price_max is not None:
             q = q.where(models.Model.price <= price_max)
-        yield i, label, (price_min, price_max), (
-            len(list(((await db.execute(q)).scalars())))
-        )
+        yield i, label, (price_min, price_max), (len(list(((await db.execute(q)).scalars()))))
 
 
 # An inclusive range of integers for user friendly price categories
@@ -127,10 +125,17 @@ async def get_index(
     tag: str = None,
     admin: str = None,
 ):
-
     statement = sa.select(models.Model).where(
         models.Model.active == True, ~(models.Model.image_url == None)
     )
+
+    retailer = None
+    if verslun:
+        results = (
+            await db.execute(sa.select(models.Retailer).where(models.Retailer.slug == verslun))
+        ).one()
+        if len(results) > 0:
+            retailer = results[0]
 
     def filter_retailers(statement):
         if verslun is None:
@@ -201,16 +206,12 @@ async def get_index(
     classification_enum = getattr(models.VehicleClassEnum, flokkur) if flokkur else None
 
     _models = await db.execute(
-        statement.order_by(
-            models.Model.price, models.Model.make, models.Model.created.desc()
-        )
+        statement.order_by(models.Model.price, models.Model.make, models.Model.created.desc())
     )
 
     models_count = (
         await db.execute(
-            statement.select_from(models.Model)
-            .with_only_columns(func.count())
-            .order_by(None)
+            statement.select_from(models.Model).with_only_columns(func.count()).order_by(None)
         )
     ).one()[0]
 
@@ -220,6 +221,7 @@ async def get_index(
             "request": request,
             "classification": classification_enum,
             "classification_counts": classification_counts,
+            "retailer": retailer,
             "tag": tag_enum,
             "tag_counts": tag_counts,
             "retailer_counts": retailer_counts,
@@ -234,9 +236,7 @@ async def get_index(
 
 @app.get("/hjol/{id}")
 async def get_model(request: Request, id: int, db: Session = Depends(get_db)):
-    statement = sa.select(models.Model).where(
-        models.Model.active == True, models.Model.id == id
-    )
+    statement = sa.select(models.Model).where(models.Model.active == True, models.Model.id == id)
     model = (await db.execute(statement)).scalars().first()
     if model is None:
         raise HTTPException(status_code=404, detail="Model not found")
@@ -266,9 +266,7 @@ async def add_tag(request: Request, tag: str, id: int, db: Session = Depends(get
 
 
 @app.delete("/models/{id}/tags/{tag}")
-async def remove_tag(
-    request: Request, tag: str, id: int, db: Session = Depends(get_db)
-):
+async def remove_tag(request: Request, tag: str, id: int, db: Session = Depends(get_db)):
     statement = sa.select(models.Model).where(models.Model.id == id)
     model = (await db.execute(statement)).scalars().first()
     if model is None or tag not in models.TagEnum.__members__:

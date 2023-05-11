@@ -1,7 +1,7 @@
 import base64
 import hashlib
-
 import re
+
 import scrapy
 
 
@@ -27,6 +27,9 @@ class SkidathjonustanSpider(scrapy.Spider):
 
         if image_url.startswith("//"):
             image_url = "https:" + image_url
+
+        if image_url.startswith("images/"):
+            image_url = "https://www.skidathjonustan.com/" + image_url
 
         # Use a hash since this website lists multiple colors as multiple
         # models and has no SKU anywhere.

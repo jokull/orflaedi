@@ -48,26 +48,29 @@ class ElkoSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        for link in response.css(".fpJyEp a"):
+        for link in response.xpath("//a[contains(@href, '/vorur/')]"):
             yield response.follow(link, self.parse_product)
 
     def parse_product(self, response):
-
-        make, name = response.css("h1::text").get().split(" ", 1)
+        name_node = response.xpath("//h1")
+        make, name = name_node.xpath("text()").get().split(" ", 1)
         if " - " in name:
             name = name.split(" - ", 1)[0]
 
-        sku = response.css(".bbyYtt::text").get().strip()
+        sku = name_node.xpath("following-sibling::div[1]/span/text()").get().strip()
 
-        price = int("".join(response.css(".doQNfU::text").re(r"\d+")))
+        price = int("".join(response.css(".large::text").re(r"\d+")))
 
         if price < 10000:
             return None
-
-        file_urls = [response.css(".slick-slide .sc-e8985f8b-8::attr('src')")[0].get()]
+        carousel = response.css(".slick-track")
+        file_urls = [carousel.xpath("//button/div/@src")[0].get()]
         classification = (
             VehicleClassEnum.bike_c
-            if (response.css(".eyHLkH ::text")[2].get() == "Hlaupahjól")
+            if (
+                response.xpath("//a[contains(@href, '/voruflokkar/')]/text()")[1].get()
+                == "Hlaupahjól"
+            )
             else VehicleClassEnum.lb_2
         )
 

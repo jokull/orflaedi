@@ -19,7 +19,7 @@ RUN poetry config virtualenvs.create false
 
 # install dependencies
 RUN pip install -r requirements.txt --no-cache-dir
-RUN pip install scrapy==2.6.3 shub
+RUN pip install scrapy==2.6.3 shub Twisted==22.10.0
 
 # copy the content of the local src directory to the working directory
 VOLUME ["/code"]

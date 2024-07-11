@@ -13,6 +13,30 @@
       </p>
     </div>
   </div>
+  <div class="py-8 my-12">
+    <div class="rounded-md bg-white shadow-xl mx-4">
+      <div
+        class="mx-auto max-w-4xl grid sm:grid-cols-[minmax(auto,380px)_minmax(min-content,1fr)] items-center"
+      >
+        <div class="relative hidden sm:block">
+          <img
+            class="absolute -translate-x-1/2 -translate-y-1/2 left-1/2 top-1/2"
+            src="{{ url_for('static', path='/801.png.webp') }}"
+          />
+        </div>
+        <div class="p-6">
+          <div class="mb-4">
+            <img class="h-6" src="{{ url_for('static', path='/tenways.svg') }}" />
+          </div>
+          <div class="mb-4">Áreiðanleg og glæsileg borgarhjól frá Tenways fást hjá t2</div>
+          <div class="flex justify-end gap-4 items-center">
+            <img class="w-12" src="{{ url_for('static', path='/logo_1.png') }}" />
+            <a href="https://www.t2.is" class="text-slate-600">www.t2.is</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
   {% endif %} {% with flokkur = request.query_params.get('flokkur') %}
   <div class="pickers mb-4 sm:flex">
     <div class="sm:mr-4 lg:flex sm:w-1/3">

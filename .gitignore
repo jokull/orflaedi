@@ -21,3 +21,5 @@ node_modules
 yarn.lock
 .parcel-cache
 static/dist/
+
+.pnpm-store

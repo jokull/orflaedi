@@ -1,6 +1,5 @@
 import os
 
-import imgix
 import sqlalchemy as sa
 from fastapi import Depends, FastAPI, HTTPException
 from sqlalchemy import func, text
@@ -11,6 +10,7 @@ from starlette.templating import Jinja2Templates
 
 from . import models
 from .database import session
+from .imgproxy import ImgProxy
 
 app = FastAPI()
 
@@ -23,14 +23,14 @@ async def get_db():
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
-builder = imgix.UrlBuilder("orflaedi.imgix.net", sign_key=os.getenv("IMGIX_TOKEN"))
+builder = ImgProxy.factory(proxy_host='https://imgproxy.plex.uno', key=os.getenv('IMGPROXY_KEY'), salt=os.getenv('IMGPROXY_SALT'))
 
 
-def imgix_create_url(url, params):
+def imgix_create_url(url, *advanced, **options):
     if url.startswith("//"):
         url = f"https:{url}"
-    return builder.create_url(url, params)
-
+    # return builder.create_url(url, params)
+    return builder(url, *advanced, **options)
 
 templates = Jinja2Templates(directory="templates")
 templates.env.globals["imgix_url"] = imgix_create_url

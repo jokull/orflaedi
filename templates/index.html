@@ -206,10 +206,10 @@
         <a href="{{ model.scrape_url }}" target="_blank" class="w-full">
           <img
             class="w-full bg-white object-contain aspect-video max-h-40 md:max-h-64 p-2 lazyload"
-            data-src="{{ imgix_url(model.image_url, {'trim':'color', 'trim-tol': '20', 'auto':'format,compress', 'w':'400'}) }}"
-            data-srcset="{{ imgix_url(model.image_url, {'trim':'color', 'trim-tol': '20', 'auto':'format,compress', 'w':'400'}) }} 1x,
-                        {{ imgix_url(model.image_url, {'trim':'color', 'trim-tol': '20', 'auto':'format,compress', 'w':'400', 'dpr': '2'}) }} 2x,
-                        {{ imgix_url(model.image_url, {'trim':'color', 'trim-tol': '20', 'auto':'format,compress', 'w':'400', 'dpr': '3'}) }} 3x"
+            data-src="{{ imgix_url(model.image_url, 'trim:20', width=400) }}"
+            data-srcset="{{ imgix_url(model.image_url, 'trim:20', width=400) }} 1x,
+                        {{ imgix_url(model.image_url, 'trim:20', width=400*2) }} 2x,
+                        {{ imgix_url(model.image_url, 'trim:20', width=400*3) }} 3x"
             alt="{{ model.name }}"
           />
         </a>

@@ -9,9 +9,9 @@ class EllingsenSpider(scrapy.Spider):
     name = "ellingsen"
 
     start_urls = [
-        "https://s4s.is/rafhjolasetrid/rafhjol/fjoelskyldurafhjol",
-        "https://s4s.is/rafhjolasetrid/rafhjol/fjallahjol/merida",
         "https://s4s.is/rafhjolasetrid/rafhjol/borgarhjol",
+        "https://s4s.is/rafhjolasetrid/rafhjol/fjallahjol",
+        "https://s4s.is/rafhjolasetrid/rafhjol/fjoelskyldurafhjol",
         "https://s4s.is/rafhjolasetrid/rafhlaupahjol/oell-rafhlaupahjol",
     ]
 
@@ -26,16 +26,25 @@ class EllingsenSpider(scrapy.Spider):
 
         classification = VehicleClassEnum.bike_c if is_class_c else VehicleClassEnum.bike_b
 
-        file_urls = [
-            response.css(".productImage::attr(src)")
-            .get()
-            .replace("855", "5000")
-            .replace("925", "5000")
-        ]
+        image_url = response.css(".productImage::attr(src)").get()
+
+        if image_url:
+            file_urls = [image_url.replace("855", "5000").replace("925", "5000")]
+        else:
+            return
 
         sku = response.css(".productNumber::text").get()
         make = response.css(".productBrand::text").get()
-        price = int("".join(response.css(".productPrice::text").re("\d+")))
+        
+        price_text = response.css(".productPrice::text").get()
+        if price_text:
+            price = int("".join(re.findall(r"\d+", price_text)))
+        else:
+            return
+        
+        if price == 0:
+            return
+
         name = response.css(".productName::text").get()
 
         if make == "Riese & Muller":

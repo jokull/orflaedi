@@ -6,7 +6,6 @@ RUN apt-get update && apt-get install -y \
     libpq-dev \
     python3-dev \
     build-essential \
-    cron \
     && rm -rf /var/lib/apt/lists/*
 
 # Copy requirements file
@@ -22,8 +21,5 @@ COPY . /app/
 # Set the working directory
 WORKDIR /app/
 
-# Install cron job
-RUN crontab /app/crontab
-
-# Start cron
-CMD ["cron", "-f", "/etc/cron.d/crontab"]
+# Run cron and tail the log file to output logs to Docker
+CMD ["sh", "-c", "while true; do echo \"Starting scraping session at: $(date)\"; cd /app && /usr/local/bin/scrapy list | xargs -n 1 /usr/local/bin/scrapy crawl; sleep 3600; done"]

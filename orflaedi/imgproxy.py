@@ -6,6 +6,7 @@ import hashlib
 import hmac
 from typing import Union, Optional, Sequence
 from functools import partial
+from urllib.parse import quote, urlparse, urlunparse
 
 # py37
 try:
@@ -53,6 +54,27 @@ class ImgProxy:
             self.salt: Union[bytes, Literal[False]] = self.salt and bytes.fromhex(self.salt)
         except ValueError:
             raise ValueError(f"Invalid signature parameters: {self.key}, {self.salt}")
+
+        # Properly encode the image URL to handle special characters
+        self.image_url = self._encode_url(self.image_url)
+
+    @staticmethod
+    def _encode_url(url: str) -> str:
+        """Properly encode URL to handle special characters like ö, ä, etc."""
+        parsed = urlparse(url)
+        # Encode the path component, keeping slashes and other URL-safe chars
+        # The safe parameter tells quote which characters NOT to encode
+        encoded_path = quote(parsed.path, safe='/:@!$&\'()*+,;=')
+        # For query string, also keep = and & safe
+        encoded_query = quote(parsed.query, safe='/:@!$&\'()*+,;=?&')
+        return urlunparse((
+            parsed.scheme,
+            parsed.netloc,
+            encoded_path,
+            parsed.params,
+            encoded_query,
+            parsed.fragment
+        ))
 
     def __str__(self) -> str:
         """Generate default URL."""

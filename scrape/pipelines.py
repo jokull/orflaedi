@@ -1,5 +1,6 @@
 import os
 import datetime as dt
+import logging
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker
@@ -40,7 +41,7 @@ class DatabasePipeline(object):
 
     def close_spider(self, spider):
         # we can deactivate these since they are no longer available
-        if not getattr(spider, "skip", False):
+        if not getattr(spider, "skip", False) and self.scraped_skus.__len__() > 0:
             self.db.query(Model).filter(
                 ~Model.sku.in_(self.scraped_skus), Model.retailer == self.retailer
             ).update({"active": False}, synchronize_session=False)

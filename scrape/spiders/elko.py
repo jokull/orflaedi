@@ -1,42 +1,7 @@
+import json
 import scrapy
 
 from orflaedi.models import VehicleClassEnum
-
-
-colors = {
-    "Svart",
-    "Hvítt",
-    "Blátt",
-    "Rautt",
-    "Grænt",
-    "Khaki",
-    "Grátt",
-    "Silfur",
-}
-
-
-skipwords = {"svifbretti", " f. ", "rafhlaða"}
-
-
-def get_name_and_color(name):
-    color = None
-    if " - " in name:
-        name, color = name.rsplit(" - ", 1)
-    return name, color
-
-
-def get_clean_name_and_classification(name):
-    parts = []
-    classification = None
-    for part in name.split():
-        if part.lower() == "rafmagnshlaupahjól":
-            classification = VehicleClassEnum.bike_c
-            continue
-        if part.lower() == "rafmagnsbifhjól":
-            classification = VehicleClassEnum.lb_2
-            continue
-        parts.append(part)
-    return " ".join(parts), classification
 
 
 class ElkoSpider(scrapy.Spider):
@@ -48,31 +13,66 @@ class ElkoSpider(scrapy.Spider):
     ]
 
     def parse(self, response):
-        for link in response.xpath("//a[contains(@href, '/vorur/')]"):
+        for link in response.xpath("//a[contains(@href, '/vorur/')]/@href").getall():
             yield response.follow(link, self.parse_product)
 
     def parse_product(self, response):
-        name_node = response.xpath("//h1")
-        make, name = name_node.xpath("text()").get().split(" ", 1)
-        if " - " in name:
-            name = name.split(" - ", 1)[0]
-
-        sku = name_node.xpath("following-sibling::div[1]/span/text()").get().strip()
-
-        price = int("".join(response.css(".large::text").re(r"\d+")))
-
-        if price < 10000:
+        # Extract JSON data from Next.js __NEXT_DATA__ script
+        script = response.xpath('//script[@id="__NEXT_DATA__"]/text()').get()
+        if not script:
             return None
-        carousel = response.css(".slick-track")
-        file_urls = [carousel.xpath("//button/div/@src")[0].get()]
-        classification = (
-            VehicleClassEnum.bike_c
-            if (
-                response.xpath("//a[contains(@href, '/voruflokkar/')]/text()")[1].get()
-                == "Hlaupahjól"
-            )
-            else VehicleClassEnum.lb_2
-        )
+        
+        try:
+            data = json.loads(script)
+            props = data.get("props", {}).get("pageProps", {})
+            product = props.get("initialProduct", {})
+            variant = props.get("initialVariant", {})
+        except (json.JSONDecodeError, KeyError):
+            return None
+        
+        name = product.get("name", "")
+        if not name:
+            return None
+        
+        # Extract make from name (first word)
+        parts = name.split(" ", 1)
+        if len(parts) < 2:
+            return None
+        make, name = parts
+        
+        # Get SKU
+        sku = variant.get("sku")
+        if not sku:
+            return None
+        
+        # Get price from listings
+        listings = variant.get("listings", {})
+        webshop = listings.get("webshop", {})
+        price_info = webshop.get("price", {})
+        price = price_info.get("discountedPrice") or price_info.get("price")
+        
+        if not price or price < 10000:
+            return None
+        
+        # Get image
+        images = variant.get("images", [])
+        file_urls = []
+        if images:
+            first_image = images[0].get("image", {})
+            image_url = first_image.get("jpgL") or first_image.get("webpL")
+            if image_url:
+                file_urls = [image_url]
+        
+        # Determine classification based on category or name
+        product_type = product.get("type", "")
+        name_lower = name.lower()
+        
+        if "hlaupahjól" in name_lower or product_type == "farartaeki":
+            classification = VehicleClassEnum.bike_c
+        elif "bifhjól" in name_lower or "létt bifhjól" in name_lower:
+            classification = VehicleClassEnum.lb_2
+        else:
+            classification = VehicleClassEnum.bike_c
 
         yield {
             "sku": sku,

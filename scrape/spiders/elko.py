@@ -12,8 +12,13 @@ class ElkoSpider(scrapy.Spider):
         "https://elko.is/voruflokkar/lett-bifhjol-287",
     ]
 
+    # Skip accessory categories
+    SKIP_SLUGS = ["hjolahjalmur", "hledslukapall"]
+
     def parse(self, response):
         for link in response.xpath("//a[contains(@href, '/vorur/')]/@href").getall():
+            if any(skip in link for skip in self.SKIP_SLUGS):
+                continue
             yield response.follow(link, self.parse_product)
 
     def parse_product(self, response):

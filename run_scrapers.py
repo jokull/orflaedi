@@ -26,7 +26,7 @@ SPIDERS = {
     "tri": {"engine": "scrapy", "status": "working"},
     "orninn": {"engine": "scrapy", "status": "working"},
     "kria": {"engine": "scrapy", "status": "working"},
-    "ofsi": {"engine": "scrapy", "status": "working"},
+    "ofsi": {"engine": "scrapling", "status": "working"},  # StealthyFetcher to bypass 429s
     "markid": {"engine": "scrapy", "status": "working"},
     "peloton": {"engine": "scrapy", "status": "working"},
     "hjolasprettur": {"engine": "scrapy", "status": "working"},

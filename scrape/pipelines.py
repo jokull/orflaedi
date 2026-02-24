@@ -2,7 +2,7 @@ import os
 import datetime as dt
 import logging
 
-from sqlalchemy import create_engine
+from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
 from scrapy.utils.project import get_project_settings
@@ -56,11 +56,20 @@ class DatabasePipeline(object):
         )
         if model is None:
             model = Model(retailer=self.retailer, sku=item["sku"])
+        # Track price changes
+        new_price = item["price"]
+        if model.id and model.price and model.price != new_price:
+            self.db.execute(text('''
+                INSERT INTO price_history (model_id, price, recorded_at)
+                VALUES (:model_id, :price, NOW())
+            '''), {'model_id': model.id, 'price': new_price})
+            logging.info(f"Price change for {model.sku}: {model.price} -> {new_price}")
+        
         model.name = item["name"]
         model.make = item.get("make") or model.make
         model.last_scraped = dt.datetime.utcnow()
         model.scrape_url = item["scrape_url"]
-        model.price = item["price"]
+        model.price = new_price
         model.image_url = len(item["file_urls"]) and item["file_urls"][0] or None
         model.active = True
         model.name = model.name or item.get("name")

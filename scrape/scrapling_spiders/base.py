@@ -11,6 +11,7 @@ from sqlalchemy.orm import sessionmaker
 import sys
 sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 
+from sqlalchemy import text
 from orflaedi.models import Model, Retailer, VehicleClassEnum
 
 
@@ -66,12 +67,21 @@ class ScraplingPipeline:
         if model is None:
             model = Model(retailer=self.retailer, sku=item["sku"])
         
+        # Track price changes
+        new_price = item["price"]
+        if model.id and model.price and model.price != new_price:
+            self.db.execute(text('''
+                INSERT INTO price_history (model_id, price, recorded_at)
+                VALUES (:model_id, :price, NOW())
+            '''), {'model_id': model.id, 'price': new_price})
+            print(f"  📊 Price change: {model.price:,} → {new_price:,} kr")
+        
         # Update fields
         model.name = item["name"]
         model.make = item.get("make") or model.make
         model.last_scraped = dt.datetime.utcnow()
         model.scrape_url = item["scrape_url"]
-        model.price = item["price"]
+        model.price = new_price
         model.image_url = item["file_urls"][0] if item.get("file_urls") else None
         model.active = True
         

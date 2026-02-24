@@ -3,3 +3,12 @@ SPIDER_MODULES = ["scrape.spiders"]
 ITEM_PIPELINES = {
     "scrape.pipelines.DatabasePipeline": 100,
 }
+
+# Rate limiting prevention
+DOWNLOAD_DELAY = 1  # 1 second between requests
+CONCURRENT_REQUESTS_PER_DOMAIN = 2
+RANDOMIZE_DOWNLOAD_DELAY = True
+AUTOTHROTTLE_ENABLED = True
+AUTOTHROTTLE_START_DELAY = 1
+AUTOTHROTTLE_MAX_DELAY = 10
+AUTOTHROTTLE_TARGET_CONCURRENCY = 1.0

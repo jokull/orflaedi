@@ -1,30 +1,46 @@
+import json
+
 import scrapy
 
 
 class BerlinSpider(scrapy.Spider):
+    """
+    reidhjolaverzlunin.is is Shopify — uses the /products.json endpoint
+    rather than parsing HTML, which makes the spider immune to theme changes.
+    """
+
     name = "berlin"
 
     start_urls = [
-        "https://www.reidhjolaverzlunin.is/collections/rafmagnshjol",
+        "https://www.reidhjolaverzlunin.is/collections/rafmagnshjol/products.json?limit=250",
     ]
 
     def parse(self, response):
-        for link in response.css(".product>a"):
-            yield response.follow(link, self.parse_product)
+        data = json.loads(response.text)
+        for product in data.get("products") or []:
+            variants = product.get("variants") or []
+            if not variants:
+                continue
+            price_text = variants[0].get("price")
+            if not price_text:
+                continue
+            try:
+                price = int(float(price_text))
+            except (TypeError, ValueError):
+                continue
+            if price <= 0:
+                continue
 
-    def parse_product(self, response):
+            images = product.get("images") or []
+            image_url = images[0].get("src") if images else None
+            if not image_url:
+                continue
 
-        price = int("".join(response.css(".money::text")[0].re(r"\d+")))
-        sku = response.css(".product-single::attr('class')").re(r"product-(\d+)")[0]
-        image_url = response.css(".product-single__photo__img::attr('data-pswp-src')").get()
-        if image_url.startswith("//"):
-            image_url = "https:" + image_url
-
-        yield {
-            "sku": sku,
-            "name": response.css(".section__title-text::text").get(),
-            "make": response.css("h4.section__title-desc a::text").get(),
-            "price": price,
-            "file_urls": [image_url],
-            "scrape_url": response.url,
-        }
+            yield {
+                "sku": str(product["id"]),
+                "name": product.get("title") or "",
+                "make": product.get("vendor") or None,
+                "price": price,
+                "file_urls": [image_url],
+                "scrape_url": f"https://www.reidhjolaverzlunin.is/products/{product['handle']}",
+            }

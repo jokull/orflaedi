@@ -69,12 +69,21 @@ if [ -z "$FINAL_TAGS" ] || [ "$FINAL_TAGS" = "null" ]; then
   exit 1
 fi
 
-# 7) Check the live Cloudflare deploy picked up this model id.
-log "checking live www.orflaedi.is..."
-LIVE_CHECK=$(curl -s "https://www.orflaedi.is/hjol/$NEW_ID/" -o /dev/null -w "%{http_code}")
-log "https://www.orflaedi.is/hjol/$NEW_ID/ → HTTP $LIVE_CHECK"
+# 7) Check the live Cloudflare deploy picked up this model id. Cloudflare
+#    edge propagation takes ~30s after wrangler reports Deployed, so poll.
+log "checking live www.orflaedi.is (waiting for edge propagation)..."
+LIVE_CHECK=""
+for attempt in 1 2 3 4 5 6 7 8; do
+  LIVE_CHECK=$(curl -s "https://www.orflaedi.is/hjol/$NEW_ID/" -o /dev/null -w "%{http_code}")
+  if [ "$LIVE_CHECK" = "200" ]; then
+    log "  attempt $attempt: HTTP 200"
+    break
+  fi
+  log "  attempt $attempt: HTTP $LIVE_CHECK (retrying in 10s)"
+  sleep 10
+done
 if [ "$LIVE_CHECK" != "200" ]; then
-  echo "FAIL — bike detail page not live (HTTP $LIVE_CHECK)"
+  echo "FAIL — bike detail page not live after ~80s (HTTP $LIVE_CHECK)"
   exit 1
 fi
 

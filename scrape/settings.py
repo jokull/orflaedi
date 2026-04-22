@@ -4,6 +4,13 @@ ITEM_PIPELINES = {
     "scrape.pipelines.DatabasePipeline": 100,
 }
 
+# Some retailer sites (e.g. gastec) 403 the default Scrapy UA. Present as a
+# regular browser; spiders that need something different can override.
+USER_AGENT = (
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+)
+
 # Rate limiting to avoid 429s
 DOWNLOAD_DELAY = 2  # 2 seconds between requests
 CONCURRENT_REQUESTS_PER_DOMAIN = 1  # One at a time per domain

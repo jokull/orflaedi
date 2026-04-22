@@ -2,15 +2,13 @@
 import Base from "../layouts/Base.astro";
 import { data, retailerById } from "../data/models";
 
-const { models, retailers, tags, price_ranges, classifications } = data;
+const { models, retailers, tags, price_ranges } = data;
 
 function formatPrice(p: number | null) {
   if (!p) return "-";
   return p.toLocaleString("is-IS").replaceAll(",", ".");
 }
 
-// Initial counts from the full dataset. Filter panels show these; client JS
-// recomputes them on interaction.
 const countsByClassification = new Map<string, number>();
 for (const m of models) {
   if (!m.classification) continue;
@@ -31,10 +29,84 @@ const countsByPriceRange: number[] = price_ranges.map(([_, lo, hi]) =>
     return true;
   }).length,
 );
+
+// Sections shown on the idle index — each samples the tag or class evenly
+// across the price range so browsing shows variety rather than the cheapest
+// N or the most expensive N.
+const SECTION_SIZE = 8;
+type Section = {
+  slug: string;
+  title: string;
+  count: number;
+  moreHref: string;
+  // Mirror of the filter the "More" link represents, so the client can
+  // toggle idle vs filtered view without a reload.
+  filter: { flokkur: string; tag?: string };
+  bikes: typeof models;
+};
+
+const tagLabel = Object.fromEntries(tags.map((t) => [t.name, t.label] as const));
+
+function sampleAcrossPrice<T extends { price: number | null }>(items: T[], n: number): T[] {
+  const priced = items.filter((m) => m.price != null).sort((a, b) => (a.price! - b.price!));
+  if (priced.length <= n) return priced;
+  const out: T[] = [];
+  for (let i = 0; i < n; i++) {
+    const idx = Math.round((i * (priced.length - 1)) / (n - 1));
+    out.push(priced[idx]);
+  }
+  return out;
+}
+
+// Order: largest bike_b tag first, then smaller bike_b tags, then the legal
+// classes that sit outside bike_b (scooters, speed pedelecs).
+const bikeBSections: Array<{ tag: string; title: string }> = [
+  { tag: "mountain",   title: tagLabel.mountain   ?? "Fjallahjól" },
+  { tag: "city",       title: tagLabel.city       ?? "Borgarhjól" },
+  { tag: "open_frame", title: tagLabel.open_frame ?? "Opinn rammi" },
+  { tag: "cargo",      title: tagLabel.cargo      ?? "Nytjahjól" },
+  { tag: "road",       title: tagLabel.road       ?? "Götuhjól / Racer" },
+];
+
+const sections: Section[] = [];
+for (const { tag, title } of bikeBSections) {
+  const pool = models.filter((m) => m.classification === "bike_b" && m.tags.includes(tag));
+  if (!pool.length) continue;
+  sections.push({
+    slug: tag,
+    title,
+    count: pool.length,
+    moreHref: `?flokkur=bike_b&tag=${tag}`,
+    filter: { flokkur: "bike_b", tag },
+    bikes: sampleAcrossPrice(pool, SECTION_SIZE),
+  });
+}
+const scooterPool = models.filter((m) => m.classification === "bike_c");
+if (scooterPool.length) {
+  sections.push({
+    slug: "bike_c",
+    title: "Rafskútur",
+    count: scooterPool.length,
+    moreHref: "?flokkur=bike_c",
+    filter: { flokkur: "bike_c" },
+    bikes: sampleAcrossPrice(scooterPool, SECTION_SIZE),
+  });
+}
+const speedPool = models.filter((m) => m.classification === "lb_1" || m.classification === "lb_2");
+if (speedPool.length) {
+  sections.push({
+    slug: "lb",
+    title: "Létt bifhjól og hraðhjól",
+    count: speedPool.length,
+    moreHref: "?flokkur=lb_1",
+    filter: { flokkur: "lb_1" },
+    bikes: sampleAcrossPrice(speedPool, SECTION_SIZE),
+  });
+}
 ---
 
 <Base>
-  <div class="sm:px-6">
+  <div class="sm:px-6" data-idle="1">
     <div id="welcome" class="welcome my-16 mx-auto px-4 sm:my-24 sm:px-6">
       <div class="text-center">
         <h1 class="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
@@ -135,54 +207,118 @@ const countsByPriceRange: number[] = price_ranges.map(([_, lo, hi]) =>
       </div>
     </div>
 
-    <div class="my-6 px-4 sm:px-0 mt-4 sm:mt-8">
-      <div class="text-xs text-right text-gray-500">
-        <span id="models-count">{models.length}</span> hjól — Verð ↑
-      </div>
+    <!-- Idle view: one small sampled grid per category. Hidden once a filter
+         is applied. Each "Skoða öll" hooks the existing client filter. -->
+    <div id="sections">
+      {sections.map((section) => (
+        <section class={`category-section category-section-${section.slug} mb-8 sm:mb-10`}>
+          <header class="flex items-baseline justify-between mb-3 px-4 sm:px-0">
+            <h2 class="text-lg sm:text-xl font-bold">
+              {section.title}
+              <span class="pill ml-2 align-middle">{section.count}</span>
+            </h2>
+            <a
+              href={section.moreHref}
+              class="text-sm text-blue-600 hover:text-blue-800 whitespace-no-wrap"
+              data-section-more={section.slug}
+              data-flokkur={section.filter.flokkur}
+              data-tag={section.filter.tag ?? ""}
+            >
+              Skoða öll →
+            </a>
+          </header>
+          <div class="bikes grid gap-2 sm:gap-4 mx-2 sm:mx-0">
+            {section.bikes.map((m) => {
+              const r = retailerById.get(m.retailer_id);
+              const srcset = [
+                `${m.images["1x"]} 1x`,
+                m.images["2x"] && `${m.images["2x"]} 2x`,
+                m.images["3x"] && `${m.images["3x"]} 3x`,
+              ].filter(Boolean).join(", ");
+              return (
+                <div class={`model model-${r?.slug ?? ""} rounded sm:rounded-md overflow-hidden sm:mb-1 bg-white`}>
+                  <div class="image relative">
+                    <a href={m.scrape_url} target="_blank" rel="noopener" class="w-full">
+                      <img
+                        class="w-full bg-white object-contain aspect-video max-h-40 md:max-h-64 p-2"
+                        loading="lazy"
+                        src={m.images["1x"]}
+                        srcset={srcset}
+                        alt={m.name ?? ""}
+                      />
+                    </a>
+                  </div>
+                  <a class="block p-3 border-t border-t-black/5" href={m.scrape_url} target="_blank" rel="noopener">
+                    <div class="font-bold uppercase text-gray-600 text-xs tracking-wider leading-tight">
+                      {m.make ?? " "}
+                    </div>
+                    <div title={m.name ?? ""} class="name font-bold text-xl">{m.name ?? " "}</div>
+                    <div class="flex justify-between align-middle text-sm text-gray-700">
+                      <p class="whitespace-no-wrap mr-2">{formatPrice(m.price)} kr</p>
+                      <div class="retailer truncate" aria-label={r?.name ?? ""}>{r?.name}</div>
+                    </div>
+                  </a>
+                </div>
+              );
+            })}
+          </div>
+        </section>
+      ))}
     </div>
 
-    <div id="bikes" class="bikes grid gap-2 sm:gap-4 mx-2 sm:mx-0">
-      {models.map((m) => {
-        const r = retailerById.get(m.retailer_id);
-        const srcset = [
-          `${m.images["1x"]} 1x`,
-          m.images["2x"] && `${m.images["2x"]} 2x`,
-          m.images["3x"] && `${m.images["3x"]} 3x`,
-        ]
-          .filter(Boolean)
-          .join(", ");
-        return (
-          <div
-            class={`model model-${r?.slug ?? ""} rounded sm:rounded-md overflow-hidden sm:mb-1 bg-white`}
-            data-classification={m.classification ?? ""}
-            data-retailer={r?.slug ?? ""}
-            data-price={m.price ?? ""}
-            data-tags={m.tags.join(",")}
-          >
-            <div class="image relative">
-              <a href={m.scrape_url} target="_blank" rel="noopener" class="w-full">
-                <img
-                  class="w-full bg-white object-contain aspect-video max-h-40 md:max-h-64 p-2"
-                  loading="lazy"
-                  src={m.images["1x"]}
-                  srcset={srcset}
-                  alt={m.name ?? ""}
-                />
-              </a>
-            </div>
-            <a class="block p-3 border-t border-t-black/5" href={m.scrape_url} target="_blank" rel="noopener">
-              <div class="font-bold uppercase text-gray-600 text-xs tracking-wider leading-tight">
-                {m.make ?? "\u00A0"}
+    <!-- Filtered view: the flat grid of everything, filtered client-side.
+         Hidden on the idle landing page. -->
+    <div id="filtered-view">
+      <div class="my-6 px-4 sm:px-0 mt-4 sm:mt-8">
+        <div class="text-xs text-right text-gray-500">
+          <span id="models-count">{models.length}</span> hjól — Verð ↑
+        </div>
+      </div>
+
+      <div id="bikes" class="bikes grid gap-2 sm:gap-4 mx-2 sm:mx-0">
+        {models
+          .slice()
+          .sort((a, b) => (a.price ?? 0) - (b.price ?? 0))
+          .map((m) => {
+            const r = retailerById.get(m.retailer_id);
+            const srcset = [
+              `${m.images["1x"]} 1x`,
+              m.images["2x"] && `${m.images["2x"]} 2x`,
+              m.images["3x"] && `${m.images["3x"]} 3x`,
+            ].filter(Boolean).join(", ");
+            return (
+              <div
+                class={`model model-${r?.slug ?? ""} rounded sm:rounded-md overflow-hidden sm:mb-1 bg-white`}
+                data-classification={m.classification ?? ""}
+                data-retailer={r?.slug ?? ""}
+                data-price={m.price ?? ""}
+                data-tags={m.tags.join(",")}
+              >
+                <div class="image relative">
+                  <a href={m.scrape_url} target="_blank" rel="noopener" class="w-full">
+                    <img
+                      class="w-full bg-white object-contain aspect-video max-h-40 md:max-h-64 p-2"
+                      loading="lazy"
+                      src={m.images["1x"]}
+                      srcset={srcset}
+                      alt={m.name ?? ""}
+                    />
+                  </a>
+                </div>
+                <a class="block p-3 border-t border-t-black/5" href={m.scrape_url} target="_blank" rel="noopener">
+                  <div class="font-bold uppercase text-gray-600 text-xs tracking-wider leading-tight">
+                    {m.make ?? " "}
+                  </div>
+                  <div title={m.name ?? ""} class="name font-bold text-xl">{m.name ?? " "}</div>
+                  <div class="flex justify-between align-middle text-sm text-gray-700">
+                    <p class="whitespace-no-wrap mr-2">{formatPrice(m.price)} kr</p>
+                    <div class="retailer truncate" aria-label={r?.name ?? ""}>{r?.name}</div>
+                  </div>
+                </a>
               </div>
-              <div title={m.name ?? ""} class="name font-bold text-xl">{m.name ?? "\u00A0"}</div>
-              <div class="flex justify-between align-middle text-sm text-gray-700">
-                <p class="whitespace-no-wrap mr-2">{formatPrice(m.price)} kr</p>
-                <div class="retailer truncate" aria-label={r?.name ?? ""}>{r?.name}</div>
-              </div>
-            </a>
-          </div>
-        );
-      })}
+            );
+          })}
+      </div>
     </div>
   </div>
 
@@ -235,8 +371,6 @@ const countsByPriceRange: number[] = price_ranges.map(([_, lo, hi]) =>
         const key = pill.dataset.count!;
         const [dim, val] = key.split(":");
         const scopedQ: Params = { ...q };
-        // Drop the dimension's own filter so the count reflects "what happens if
-        // I click this", not the current selection within the same dimension.
         (scopedQ as any)[dim === "tag" ? "tag" : dim] = undefined;
         delete (scopedQ as any)[dim === "tag" ? "tag" : dim];
         (scopedQ as any)[dim === "tag" ? "tag" : dim] = val;
@@ -256,7 +390,7 @@ const countsByPriceRange: number[] = price_ranges.map(([_, lo, hi]) =>
 
     function apply() {
       const q = readParams();
-      const items = Array.from(document.querySelectorAll<HTMLElement>(".model"));
+      const items = Array.from(document.querySelectorAll<HTMLElement>("#bikes .model"));
       let visible = 0;
       for (const it of items) {
         const ok = matches(it, q);
@@ -273,8 +407,10 @@ const countsByPriceRange: number[] = price_ranges.map(([_, lo, hi]) =>
         a.querySelector("span")?.classList.toggle("selected", !!sel);
       });
 
-      const hasAny = Object.keys(q).length > 0;
-      document.getElementById("welcome")?.classList.toggle("hidden", hasAny);
+      const idle = Object.keys(q).length === 0;
+      const root = document.querySelector<HTMLElement>("[data-idle]");
+      if (root) root.dataset.idle = idle ? "1" : "0";
+      document.getElementById("welcome")?.classList.toggle("hidden", !idle);
 
       document.querySelectorAll<HTMLElement>("[data-picker]").forEach((panel) => {
         const key = panel.dataset.picker;
@@ -289,24 +425,35 @@ const countsByPriceRange: number[] = price_ranges.map(([_, lo, hi]) =>
     }
 
     function onClick(e: MouseEvent) {
-      const a = (e.target as HTMLElement).closest<HTMLAnchorElement>("a[data-filter]");
+      const a = (e.target as HTMLElement).closest<HTMLAnchorElement>(
+        "a[data-filter], a[data-section-more]"
+      );
       if (!a) return;
       e.preventDefault();
-      const k = a.dataset.filter as keyof Params;
-      const v = a.dataset.value!;
-      const q = readParams();
-      const alreadySelected =
-        q[k] === v || (k === "flokkur" && v === "lb_1" && (q.flokkur === "lb_1" || q.flokkur === "lb_2"));
-      if (alreadySelected) {
-        delete q[k];
-        if (k === "flokkur") delete q.tag;
+
+      let q: Params = readParams();
+      if (a.dataset.sectionMore !== undefined) {
+        // "Skoða öll" — set flokkur (+ tag) from the section, no toggle.
+        q = {};
+        q.flokkur = a.dataset.flokkur!;
+        if (a.dataset.tag) q.tag = a.dataset.tag;
       } else {
-        q[k] = v;
-        if (k === "tag") q.flokkur = "bike_b";
-        if (k === "flokkur") delete q.tag;
+        const k = a.dataset.filter as keyof Params;
+        const v = a.dataset.value!;
+        const alreadySelected =
+          q[k] === v || (k === "flokkur" && v === "lb_1" && (q.flokkur === "lb_1" || q.flokkur === "lb_2"));
+        if (alreadySelected) {
+          delete q[k];
+          if (k === "flokkur") delete q.tag;
+        } else {
+          q[k] = v;
+          if (k === "tag") q.flokkur = "bike_b";
+          if (k === "flokkur") delete q.tag;
+        }
       }
       history.pushState(q, "", buildHref(q));
       apply();
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
 
     document.addEventListener("click", onClick);
@@ -316,4 +463,9 @@ const countsByPriceRange: number[] = price_ranges.map(([_, lo, hi]) =>
     });
     apply();
   </script>
+
+  <style>
+    [data-idle="1"] #filtered-view { display: none; }
+    [data-idle="0"] #sections       { display: none; }
+  </style>
 </Base>

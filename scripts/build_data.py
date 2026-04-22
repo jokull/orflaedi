@@ -71,15 +71,28 @@ def variant_name(url: str, width: int) -> str:
     return h.hexdigest()[:16] + ".webp"
 
 
-def trim_borders(img: Image.Image, pad: int = TRIM_PAD) -> Image.Image:
-    """Trim near-white borders, like imgproxy's trim:20. Threshold is lenient."""
+def flatten_to_rgb(img: Image.Image) -> Image.Image:
+    """Composite any transparency on white so P-mode/palette-alpha PNGs
+    (e.g. Markid Scott photos which have a green palette color under alpha)
+    don't bleed the palette color through as a background."""
+    if img.mode == "P" and "transparency" in img.info:
+        img = img.convert("RGBA")
     if img.mode in ("RGBA", "LA"):
-        bg = Image.new(img.mode, img.size, (255,) * len(img.mode))
-        diff = ImageChops.difference(img.convert(img.mode), bg)
-    else:
-        rgb = img.convert("RGB")
-        bg = Image.new("RGB", rgb.size, (255, 255, 255))
-        diff = ImageChops.difference(rgb, bg)
+        bg = Image.new("RGB", img.size, (255, 255, 255))
+        if img.mode == "LA":
+            img = img.convert("RGBA")
+        bg.paste(img, mask=img.split()[-1])
+        return bg
+    if img.mode != "RGB":
+        return img.convert("RGB")
+    return img
+
+
+def trim_borders(img: Image.Image, pad: int = TRIM_PAD) -> Image.Image:
+    """Trim near-white borders, like imgproxy's trim:20. Threshold is lenient.
+    Assumes img is already flattened to RGB on white (see flatten_to_rgb)."""
+    bg = Image.new("RGB", img.size, (255, 255, 255))
+    diff = ImageChops.difference(img, bg)
     diff = ImageChops.add(diff, diff, 2.0, -pad)
     bbox = diff.getbbox()
     if bbox:
@@ -117,9 +130,8 @@ def render_variants(src_bytes: bytes, url: str) -> dict[str, str]:
     except Exception as e:
         print(f"  ✗ decode {url}: {e}", file=sys.stderr)
         return {}
-    trimmed = trim_borders(base)
-    if trimmed.mode not in ("RGB", "RGBA"):
-        trimmed = trimmed.convert("RGBA" if "A" in trimmed.mode else "RGB")
+    flattened = flatten_to_rgb(base)
+    trimmed = trim_borders(flattened)
 
     for v in VARIANTS:
         name = variant_name(url, v["width"])

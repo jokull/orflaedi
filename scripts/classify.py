@@ -45,6 +45,13 @@ DATABASE_URL = os.environ.get(
 CLASSES = [c.name for c in M.VehicleClassEnum]
 TAGS = [t.name for t in M.TagEnum]
 
+# Hard limits — protect against runaway scrapers / bugged prompts draining
+# the Claude subscription. Raise explicitly via CLI flags when you need more.
+PER_CALL_BUDGET_USD = 0.50      # max $/bike; passed to claude --max-budget-usd
+PER_CALL_TIMEOUT_SEC = 90        # kill the CLI subprocess if it hangs
+DEFAULT_BACKFILL_LIMIT = 200     # default bikes per run (override with -n)
+DEFAULT_BACKFILL_COST_CAP = 25.0 # stop early if run cost exceeds this
+
 PROMPT_TEMPLATE = """\
 You are a bike-classification labeler. Reply with a single minified JSON object, nothing else.
 
@@ -103,11 +110,23 @@ async def classify_one(image_path: str, name: str, make: str | None) -> dict | N
         "Bash Edit Write WebFetch WebSearch Grep Glob",
         "--effort",
         "low",
+        "--max-budget-usd",
+        str(PER_CALL_BUDGET_USD),
         stdin=asyncio.subprocess.PIPE,
         stdout=asyncio.subprocess.PIPE,
         stderr=asyncio.subprocess.PIPE,
     )
-    stdout, _ = await proc.communicate(prompt.encode())
+    try:
+        stdout, _ = await asyncio.wait_for(
+            proc.communicate(prompt.encode()), timeout=PER_CALL_TIMEOUT_SEC
+        )
+    except asyncio.TimeoutError:
+        proc.kill()
+        try:
+            await asyncio.wait_for(proc.wait(), timeout=5)
+        except asyncio.TimeoutError:
+            pass
+        return None
     try:
         wrapper = json.loads(stdout.decode())
     except json.JSONDecodeError:
@@ -224,16 +243,193 @@ async def validate(sample_size: int, concurrency: int = 4) -> None:
     print(f"\nTotal cost: ${total_cost:.2f}")
 
 
+async def backfill(
+    limit: int,
+    concurrency: int = 4,
+    cost_cap: float = DEFAULT_BACKFILL_COST_CAP,
+) -> None:
+    """
+    Classify active bikes that have the default classification and no tags,
+    writing results back to the DB. Safe to interrupt and rerun — only
+    untagged rows are considered, so progress is preserved.
+
+    Two hard limits protect against runaway costs:
+      - limit: max bikes processed this run (default DEFAULT_BACKFILL_LIMIT).
+      - cost_cap: stop early when cumulative cost exceeds this (USD).
+    """
+    engine = sa.create_engine(DATABASE_URL)
+    Session = sessionmaker(bind=engine)
+    with Session() as db:
+        q = (
+            sa.select(M.Model)
+            .where(
+                M.Model.active.is_(True),
+                sa.or_(
+                    M.Model.tags.is_(None),
+                    sa.func.array_length(M.Model.tags, 1).is_(None),
+                ),
+            )
+            .order_by(M.Model.id)
+            .limit(limit)
+        )
+        rows = db.execute(q).scalars().all()
+
+    image_map = load_image_map()
+    targets = [m for m in rows if m.id in image_map]
+    skipped_no_image = len(rows) - len(targets)
+    if not targets:
+        print("No untagged bikes with images to classify.")
+        return
+
+    print(
+        f"Backfilling up to {len(targets)} bikes "
+        f"({skipped_no_image} skipped — no image in build)  "
+        f"concurrency={concurrency}  cost_cap=${cost_cap:.2f}"
+    )
+
+    sem = asyncio.Semaphore(concurrency)
+
+    async def handle(model: M.Model) -> tuple[M.Model, dict | None]:
+        pred = await bounded_classify(
+            sem, image_map[model.id], model.name or "", model.make or ""
+        )
+        return model, pred
+
+    tasks = [asyncio.create_task(handle(m)) for m in targets]
+
+    done = 0
+    ok = 0
+    failed = 0
+    total_cost = 0.0
+    class_counter: Counter = Counter()
+    tag_counter: Counter = Counter()
+    cost_capped = False
+
+    with Session() as db:
+        for task in asyncio.as_completed(tasks):
+            model, pred = await task
+            done += 1
+            if pred is None:
+                failed += 1
+                print(f"  [{done}/{len(targets)}] ✗ {model.id} {model.make} {(model.name or '')[:40]}  [fail]")
+                continue
+
+            total_cost += pred.get("_cost", 0)
+            pred_class = pred["classification"]
+            pred_tags = pred.get("tags") or []
+            class_counter[pred_class] += 1
+            for t in pred_tags:
+                tag_counter[t] += 1
+
+            db.execute(
+                sa.update(M.Model)
+                .where(M.Model.id == model.id)
+                .values(
+                    classification=M.VehicleClassEnum[pred_class],
+                    tags=[M.TagEnum[t] for t in pred_tags],
+                )
+            )
+            db.commit()
+            ok += 1
+            print(
+                f"  [{done}/{len(targets)}] ✓ {model.id} {(model.make or '?')[:14]:<14} "
+                f"{(model.name or '')[:32]:<32}  {pred_class} {pred_tags}  "
+                f"${pred.get('_cost', 0):.3f}"
+            )
+
+            if total_cost >= cost_cap:
+                cost_capped = True
+                print(
+                    f"\n!! cost cap reached (${total_cost:.2f} ≥ ${cost_cap:.2f}) — "
+                    f"cancelling remaining tasks"
+                )
+                for t in tasks:
+                    if not t.done():
+                        t.cancel()
+                break
+
+    print(f"\n--- Backfill done: {ok} classified, {failed} failed{' [COST CAPPED]' if cost_capped else ''} ---")
+    print(f"Classes: {dict(class_counter)}")
+    print(f"Tags:    {dict(tag_counter)}")
+    print(f"Total cost: ${total_cost:.2f}")
+
+
+async def classify_by_sku(retailer_slug: str, sku: str) -> dict | None:
+    """Classify a single bike by retailer+sku and persist. Used by the
+    post-scrape pipeline hook on fresh/newly-added items."""
+    engine = sa.create_engine(DATABASE_URL)
+    Session = sessionmaker(bind=engine)
+    with Session() as db:
+        model = (
+            db.query(M.Model)
+            .join(M.Retailer)
+            .filter(M.Retailer.slug == retailer_slug, M.Model.sku == sku)
+            .first()
+        )
+        if not model:
+            print(f"no model {retailer_slug}/{sku}", file=sys.stderr)
+            return None
+
+    image_map = load_image_map()
+    if model.id not in image_map:
+        print(f"no image built for {model.id}", file=sys.stderr)
+        return None
+
+    sem = asyncio.Semaphore(1)
+    pred = await bounded_classify(
+        sem, image_map[model.id], model.name or "", model.make or ""
+    )
+    if pred is None:
+        return None
+
+    with Session() as db:
+        db.execute(
+            sa.update(M.Model)
+            .where(M.Model.id == model.id)
+            .values(
+                classification=M.VehicleClassEnum[pred["classification"]],
+                tags=[M.TagEnum[t] for t in pred.get("tags") or []],
+            )
+        )
+        db.commit()
+    return pred
+
+
 def main():
     parser = argparse.ArgumentParser()
     sub = parser.add_subparsers(dest="cmd", required=True)
+
     v = sub.add_parser("validate", help="Validate against manually-tagged bikes")
     v.add_argument("-n", type=int, default=20)
     v.add_argument("-c", "--concurrency", type=int, default=4)
 
+    b = sub.add_parser("backfill", help="Classify active untagged bikes")
+    b.add_argument(
+        "-n",
+        type=int,
+        default=DEFAULT_BACKFILL_LIMIT,
+        help=f"Max bikes per run (default {DEFAULT_BACKFILL_LIMIT})",
+    )
+    b.add_argument("-c", "--concurrency", type=int, default=4)
+    b.add_argument(
+        "--cost-cap",
+        type=float,
+        default=DEFAULT_BACKFILL_COST_CAP,
+        help=f"Stop early once total cost exceeds this (USD, default {DEFAULT_BACKFILL_COST_CAP})",
+    )
+
+    s = sub.add_parser("sku", help="Classify one bike by retailer slug + sku")
+    s.add_argument("retailer")
+    s.add_argument("sku")
+
     args = parser.parse_args()
     if args.cmd == "validate":
         asyncio.run(validate(args.n, args.concurrency))
+    elif args.cmd == "backfill":
+        asyncio.run(backfill(args.n, args.concurrency, args.cost_cap))
+    elif args.cmd == "sku":
+        result = asyncio.run(classify_by_sku(args.retailer, args.sku))
+        print(json.dumps(result) if result else "FAILED")
 
 
 if __name__ == "__main__":

@@ -30,3 +30,4 @@ web/.astro/
 web/public/images/
 web/src/data/models.json
 .wrangler/
+logs/

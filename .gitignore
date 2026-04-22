@@ -23,3 +23,10 @@ yarn.lock
 static/dist/
 
 .pnpm-store
+
+# Astro / Cloudflare
+web/dist/
+web/.astro/
+web/public/images/
+web/src/data/models.json
+.wrangler/

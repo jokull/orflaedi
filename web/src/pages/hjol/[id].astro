@@ -1,0 +1,55 @@
+---
+import Base from "../../layouts/Base.astro";
+import { data, retailerById } from "../../data/models";
+
+export function getStaticPaths() {
+  return data.models.map((m) => ({ params: { id: String(m.id) }, props: { model: m } }));
+}
+
+const { model } = Astro.props;
+const retailer = retailerById.get(model.retailer_id);
+
+function formatPrice(p: number | null) {
+  if (!p) return "-";
+  return p.toLocaleString("is-IS").replaceAll(",", ".");
+}
+
+const srcset = [
+  `${model.images["1x"]} 1x`,
+  model.images["2x"] && `${model.images["2x"]} 2x`,
+  model.images["3x"] && `${model.images["3x"]} 3x`,
+]
+  .filter(Boolean)
+  .join(", ");
+---
+
+<Base title={`${model.name ?? ""} - Örflæði`}>
+  <div class="px-4 sm:px-6 py-6">
+    <div class="bg-white rounded-md overflow-hidden max-w-3xl mx-auto">
+      <img
+        class="w-full bg-white object-contain aspect-video max-h-96 p-4"
+        src={model.images["1x"]}
+        srcset={srcset}
+        alt={model.name ?? ""}
+      />
+      <div class="p-6 border-t border-t-black/5">
+        {model.make && (
+          <div class="font-bold uppercase text-gray-600 text-xs tracking-wider">{model.make}</div>
+        )}
+        <h1 class="font-bold text-3xl my-1">{model.name}</h1>
+        <div class="flex justify-between items-center mt-4 text-sm">
+          <div class="text-xl font-bold">{formatPrice(model.price)} kr</div>
+          <div class="text-gray-700">{retailer?.name}</div>
+        </div>
+        <a
+          class="inline-block mt-6 bg-blue-600 text-white px-4 py-2 rounded font-bold"
+          href={model.scrape_url}
+          target="_blank"
+          rel="noopener"
+        >
+          Skoða hjá {retailer?.name} →
+        </a>
+      </div>
+    </div>
+  </div>
+</Base>

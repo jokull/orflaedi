@@ -1,0 +1,19 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "orflaedi",
+  "main": "src/worker.js",
+  "compatibility_date": "2026-04-01",
+  "workers_dev": true,
+  "preview_urls": true,
+  "assets": {
+    "directory": "./dist",
+    "binding": "ASSETS",
+    "not_found_handling": "404-page",
+    "run_worker_first": true
+  },
+  "routes": [
+    { "pattern": "www.orflaedi.is", "custom_domain": true },
+    { "pattern": "orflaedi.is", "custom_domain": true }
+  ],
+  "observability": { "enabled": true }
+}

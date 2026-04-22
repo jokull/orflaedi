@@ -1,0 +1,23 @@
+{
+  "name": "web",
+  "type": "module",
+  "version": "0.0.1",
+  "engines": {
+    "node": ">=22.12.0"
+  },
+  "scripts": {
+    "dev": "astro dev",
+    "build:data": "cd .. && .venv/bin/python scripts/build_data.py",
+    "build": "pnpm run build:data && astro build",
+    "preview": "astro preview",
+    "deploy": "pnpm run build && wrangler deploy",
+    "astro": "astro"
+  },
+  "dependencies": {
+    "astro": "^6.1.8"
+  },
+  "devDependencies": {
+    "@tailwindcss/vite": "^4.2.2",
+    "tailwindcss": "^4.2.2"
+  }
+}

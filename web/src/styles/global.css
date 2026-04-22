@@ -1,0 +1,117 @@
+@import "tailwindcss";
+
+body {
+  font-family: system-ui, -apple-system, Segoe UI, Roboto, Noto Sans, Ubuntu, Cantarell, Helvetica Neue;
+}
+
+#logo svg:hover .letter {
+  @apply fill-blue-600;
+}
+
+.pickers li {
+  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+}
+.pickers li a .name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+  max-width: 80%;
+}
+
+.bikes {
+  grid-template-columns: 1fr;
+}
+@media (min-width: 640px) {
+  .bikes { grid-template-columns: repeat(2, 1fr); }
+}
+@media (min-width: 768px) {
+  .bikes { grid-template-columns: repeat(3, 1fr); }
+}
+@media (min-width: 1024px) {
+  .bikes { grid-template-columns: repeat(4, 1fr); }
+}
+
+.bikes .name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.pill {
+  @apply inline-block bg-gray-300 rounded-full px-3 py-1 text-xs font-semibold text-gray-700;
+}
+
+.picker {
+  @apply px-4;
+}
+.picker .inner {
+  @apply my-6;
+}
+@media (min-width: 640px) {
+  .picker { @apply px-0; }
+}
+
+.picker ul li {
+  @apply pb-2 text-xs;
+}
+@media (min-width: 640px) {
+  .picker ul li { @apply text-sm; }
+}
+
+.picker ul li a {
+  @apply flex items-center justify-between;
+}
+
+.picker .selected {
+  font-weight: bold;
+  color: black;
+}
+
+.picker button {
+  display: block;
+}
+
+.picker .title {
+  @apply font-bold uppercase text-xs my-3;
+}
+
+.picker button img {
+  transform: rotate(180deg);
+  transition: all 170ms cubic-bezier(0.4, 0, 1, 1);
+  transform-style: flat;
+  z-index: -1;
+}
+
+.picker ul {
+  display: none;
+}
+
+.pickers .expanded ul {
+  display: grid;
+}
+
+.pickers .expanded button img {
+  transform: rotate(0deg);
+}
+
+@media (min-width: 640px) {
+  .picker button img { display: none; }
+  .picker ul { display: grid; }
+}
+
+.picker-retailers ul {
+  @apply grid-cols-2;
+}
+@media (min-width: 768px) {
+  .picker-retailers ul { @apply grid-cols-3; }
+}
+
+.image .tags {
+  bottom: 0;
+}
+
+/* Client-filter: hide bikes that don't match */
+.model[data-hidden="1"] { display: none; }
+/* Client-filter: pill counts + selected indicator */
+.picker .pill.hide { display: none; }

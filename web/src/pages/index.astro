@@ -1,0 +1,319 @@
+---
+import Base from "../layouts/Base.astro";
+import { data, retailerById } from "../data/models";
+
+const { models, retailers, tags, price_ranges, classifications } = data;
+
+function formatPrice(p: number | null) {
+  if (!p) return "-";
+  return p.toLocaleString("is-IS").replaceAll(",", ".");
+}
+
+// Initial counts from the full dataset. Filter panels show these; client JS
+// recomputes them on interaction.
+const countsByClassification = new Map<string, number>();
+for (const m of models) {
+  if (!m.classification) continue;
+  countsByClassification.set(m.classification, (countsByClassification.get(m.classification) ?? 0) + 1);
+}
+const bikeBTagCounts = new Map<string, number>();
+for (const m of models) {
+  if (m.classification !== "bike_b") continue;
+  for (const t of m.tags) bikeBTagCounts.set(t, (bikeBTagCounts.get(t) ?? 0) + 1);
+}
+const countsByRetailer = new Map<number, number>();
+for (const m of models) countsByRetailer.set(m.retailer_id, (countsByRetailer.get(m.retailer_id) ?? 0) + 1);
+const countsByPriceRange: number[] = price_ranges.map(([_, lo, hi]) =>
+  models.filter((m) => {
+    if (!m.price) return false;
+    if (lo != null && m.price < lo) return false;
+    if (hi != null && m.price > hi) return false;
+    return true;
+  }).length,
+);
+---
+
+<Base>
+  <div class="sm:px-6">
+    <div id="welcome" class="welcome my-16 mx-auto px-4 sm:my-24 sm:px-6">
+      <div class="text-center">
+        <h1 class="text-4xl tracking-tight font-extrabold text-gray-900 sm:text-5xl md:text-6xl">
+          Öll rafhjól á Íslandi <br />
+          <span class="text-blue-600">á einum stað</span>
+        </h1>
+        <p class="mt-3 max-w-md mx-auto text-base text-gray-500 sm:text-lg md:mt-5 md:text-xl md:max-w-3xl">
+          Hér eru rafhjól, létt bifhjól og rafhlaupahjól sem flestra söluaðila landsins færð í eitt handhægt yfirlit.
+        </p>
+      </div>
+    </div>
+
+    <div class="pickers mb-4 sm:flex">
+      <div class="sm:mr-4 lg:flex sm:w-1/3">
+        <div class="picker picker-tags lg:w-1/2 lg:mr-4">
+          <div class="inner" data-picker="tags">
+            <button class="block title" type="button">
+              Flokkar
+              <img src="/chevron.down.circle.svg" class="inline h-4 ml-2" alt="" />
+            </button>
+            <ul class="grid grid-cols-1 gap-4 gap-y-2">
+              <li>
+                <a href="?flokkur=bike_b" data-filter="flokkur" data-value="bike_b">
+                  <span>Rafhjól</span>
+                  <span class="pill ml-2" data-count="flokkur:bike_b">{countsByClassification.get("bike_b") ?? 0}</span>
+                </a>
+              </li>
+              {tags.map((t) => (
+                <li class="ml-4">
+                  <a href={`?flokkur=bike_b&tag=${t.name}`} data-filter="tag" data-value={t.name}>
+                    <span>{t.label}</span>
+                    <span class="pill ml-2" data-count={`tag:${t.name}`}>{bikeBTagCounts.get(t.name) ?? 0}</span>
+                  </a>
+                </li>
+              ))}
+              <li>
+                <a href="?flokkur=bike_c" data-filter="flokkur" data-value="bike_c">
+                  <span>Rafskútur</span>
+                  <span class="pill ml-2" data-count="flokkur:bike_c">{countsByClassification.get("bike_c") ?? 0}</span>
+                </a>
+              </li>
+              <li>
+                <a href="?flokkur=lb_1" data-filter="flokkur" data-value="lb_1">
+                  <span>Létt bifhjól</span>
+                  <span class="pill ml-2" data-count="flokkur:lb_1">
+                    {(countsByClassification.get("lb_1") ?? 0) + (countsByClassification.get("lb_2") ?? 0)}
+                  </span>
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="picker picker-price_ranges lg:w-1/2">
+          <div class="inner mb-4" data-picker="verdbil">
+            <button class="block title" type="button">
+              Verðbil
+              <img src="/chevron.down.circle.svg" class="inline h-4 ml-2" alt="" />
+            </button>
+            <ul class="grid grid-cols-1 gap-x-4 gap-y-2">
+              {price_ranges.map(([label], i) => (
+                <li>
+                  <a href={`?verdbil=${i}`} data-filter="verdbil" data-value={String(i)}>
+                    <span>{label}</span>
+                    <span class="pill ml-2" data-count={`verdbil:${i}`}>{countsByPriceRange[i]}</span>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      </div>
+
+      <div class="lg:flex-shrink sm:w-2/3">
+        <div class="picker picker-retailers">
+          <div class="inner" data-picker="verslun">
+            <button class="block title" type="button">
+              Verslun
+              <img src="/chevron.down.circle.svg" class="inline h-4 ml-2" alt="" />
+            </button>
+            <ul class="grid gap-x-4 gap-y-2">
+              {retailers.map((r) => (
+                <li>
+                  <a href={`?verslun=${r.slug}`} data-filter="verslun" data-value={r.slug}>
+                    <span class="name">{r.name}</span>
+                    <span class="pill ml-2" data-count={`verslun:${r.slug}`}>{countsByRetailer.get(r.id) ?? 0}</span>
+                  </a>
+                </li>
+              ))}
+              <li>
+                <a href="https://topphjol.is" target="_blank" rel="noopener" class="px-3 py-1 ml-2 shadow-none bg-transparent">
+                  Topphjól →
+                </a>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="my-6 px-4 sm:px-0 mt-4 sm:mt-8">
+      <div class="text-xs text-right text-gray-500">
+        <span id="models-count">{models.length}</span> hjól — Verð ↑
+      </div>
+    </div>
+
+    <div id="bikes" class="bikes grid gap-2 sm:gap-4 mx-2 sm:mx-0">
+      {models.map((m) => {
+        const r = retailerById.get(m.retailer_id);
+        const srcset = [
+          `${m.images["1x"]} 1x`,
+          m.images["2x"] && `${m.images["2x"]} 2x`,
+          m.images["3x"] && `${m.images["3x"]} 3x`,
+        ]
+          .filter(Boolean)
+          .join(", ");
+        return (
+          <div
+            class={`model model-${r?.slug ?? ""} rounded sm:rounded-md overflow-hidden sm:mb-1 bg-white`}
+            data-classification={m.classification ?? ""}
+            data-retailer={r?.slug ?? ""}
+            data-price={m.price ?? ""}
+            data-tags={m.tags.join(",")}
+          >
+            <div class="image relative">
+              <a href={m.scrape_url} target="_blank" rel="noopener" class="w-full">
+                <img
+                  class="w-full bg-white object-contain aspect-video max-h-40 md:max-h-64 p-2"
+                  loading="lazy"
+                  src={m.images["1x"]}
+                  srcset={srcset}
+                  alt={m.name ?? ""}
+                />
+              </a>
+            </div>
+            <a class="block p-3 border-t border-t-black/5" href={m.scrape_url} target="_blank" rel="noopener">
+              <div class="font-bold uppercase text-gray-600 text-xs tracking-wider leading-tight">
+                {m.make ?? "\u00A0"}
+              </div>
+              <div title={m.name ?? ""} class="name font-bold text-xl">{m.name ?? "\u00A0"}</div>
+              <div class="flex justify-between align-middle text-sm text-gray-700">
+                <p class="whitespace-no-wrap mr-2">{formatPrice(m.price)} kr</p>
+                <div class="retailer truncate" aria-label={r?.name ?? ""}>{r?.name}</div>
+              </div>
+            </a>
+          </div>
+        );
+      })}
+    </div>
+  </div>
+
+  <script>
+    import { data } from "../data/models";
+
+    type Params = { flokkur?: string; tag?: string; verslun?: string; verdbil?: string };
+
+    const priceRanges = data.price_ranges;
+
+    function readParams(): Params {
+      const u = new URL(window.location.href);
+      const q: Params = {};
+      for (const k of ["flokkur", "tag", "verslun", "verdbil"] as const) {
+        const v = u.searchParams.get(k);
+        if (v) q[k] = v;
+      }
+      return q;
+    }
+
+    function matches(el: HTMLElement, q: Params) {
+      if (q.flokkur) {
+        const c = el.dataset.classification;
+        if (q.flokkur === "lb_1" || q.flokkur === "lb_2") {
+          if (c !== "lb_1" && c !== "lb_2") return false;
+        } else if (c !== q.flokkur) return false;
+      }
+      if (q.verslun && el.dataset.retailer !== q.verslun) return false;
+      if (q.tag) {
+        const tags = (el.dataset.tags ?? "").split(",").filter(Boolean);
+        if (!tags.includes(q.tag)) return false;
+      }
+      if (q.verdbil !== undefined) {
+        const idx = parseInt(q.verdbil, 10);
+        const range = priceRanges[idx];
+        if (range) {
+          const p = parseInt(el.dataset.price ?? "", 10);
+          if (!p) return false;
+          const [, lo, hi] = range;
+          if (lo != null && p < lo) return false;
+          if (hi != null && p > hi) return false;
+        }
+      }
+      return true;
+    }
+
+    function recount(items: HTMLElement[], q: Params) {
+      const pills = document.querySelectorAll<HTMLElement>("[data-count]");
+      pills.forEach((pill) => {
+        const key = pill.dataset.count!;
+        const [dim, val] = key.split(":");
+        const scopedQ: Params = { ...q };
+        // Drop the dimension's own filter so the count reflects "what happens if
+        // I click this", not the current selection within the same dimension.
+        (scopedQ as any)[dim === "tag" ? "tag" : dim] = undefined;
+        delete (scopedQ as any)[dim === "tag" ? "tag" : dim];
+        (scopedQ as any)[dim === "tag" ? "tag" : dim] = val;
+        if (dim === "tag") scopedQ.flokkur = "bike_b";
+        let n = 0;
+        for (const it of items) if (matches(it, scopedQ)) n++;
+        pill.textContent = String(n);
+      });
+    }
+
+    function buildHref(params: Params) {
+      const sp = new URLSearchParams();
+      for (const [k, v] of Object.entries(params)) if (v !== undefined && v !== "") sp.set(k, String(v));
+      const qs = sp.toString();
+      return qs ? `?${qs}` : "/";
+    }
+
+    function apply() {
+      const q = readParams();
+      const items = Array.from(document.querySelectorAll<HTMLElement>(".model"));
+      let visible = 0;
+      for (const it of items) {
+        const ok = matches(it, q);
+        it.dataset.hidden = ok ? "0" : "1";
+        if (ok) visible++;
+      }
+      const countEl = document.getElementById("models-count");
+      if (countEl) countEl.textContent = String(visible);
+
+      document.querySelectorAll<HTMLElement>("[data-filter]").forEach((a) => {
+        const k = a.dataset.filter as keyof Params;
+        const v = a.dataset.value!;
+        const sel = q[k] === v || (k === "flokkur" && v === "lb_1" && (q.flokkur === "lb_1" || q.flokkur === "lb_2"));
+        a.querySelector("span")?.classList.toggle("selected", !!sel);
+      });
+
+      const hasAny = Object.keys(q).length > 0;
+      document.getElementById("welcome")?.classList.toggle("hidden", hasAny);
+
+      document.querySelectorAll<HTMLElement>("[data-picker]").forEach((panel) => {
+        const key = panel.dataset.picker;
+        const active =
+          (key === "tags" && (q.flokkur || q.tag)) ||
+          (key === "verdbil" && q.verdbil !== undefined) ||
+          (key === "verslun" && q.verslun);
+        if (active) panel.classList.add("expanded");
+      });
+
+      recount(items, q);
+    }
+
+    function onClick(e: MouseEvent) {
+      const a = (e.target as HTMLElement).closest<HTMLAnchorElement>("a[data-filter]");
+      if (!a) return;
+      e.preventDefault();
+      const k = a.dataset.filter as keyof Params;
+      const v = a.dataset.value!;
+      const q = readParams();
+      const alreadySelected =
+        q[k] === v || (k === "flokkur" && v === "lb_1" && (q.flokkur === "lb_1" || q.flokkur === "lb_2"));
+      if (alreadySelected) {
+        delete q[k];
+        if (k === "flokkur") delete q.tag;
+      } else {
+        q[k] = v;
+        if (k === "tag") q.flokkur = "bike_b";
+        if (k === "flokkur") delete q.tag;
+      }
+      history.pushState(q, "", buildHref(q));
+      apply();
+    }
+
+    document.addEventListener("click", onClick);
+    window.addEventListener("popstate", apply);
+    document.querySelectorAll<HTMLElement>("[data-picker] .title").forEach((btn) => {
+      btn.addEventListener("click", () => btn.parentElement?.classList.toggle("expanded"));
+    });
+    apply();
+  </script>
+</Base>

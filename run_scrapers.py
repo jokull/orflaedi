@@ -36,6 +36,7 @@ SPIDERS = {
     
     # JS-rendered sites - use Scrapling/Playwright
     "ellingsen": {"engine": "scrapling", "status": "working"},
+    "stormur": {"engine": "scrapling", "status": "working"},
     
     # TODO: Need Scrapling migration
     "elko": {"engine": "scrapling", "status": "working"},

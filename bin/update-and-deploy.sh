@@ -31,6 +31,14 @@ while docker compose -f /Users/jokull/mediaserver/docker-compose.yml \
   sleep 30
 done
 
+# 0) Run host-side Playwright spiders (stormur.is 403s plain HTTP, so it can't
+#    live in the Docker-based scrapy runner). Soft-fail so a broken spider
+#    doesn't block deploy.
+log "running stormur (Playwright)..."
+"$ROOT/.venv/bin/python" "$ROOT/scrape/scrapling_spiders/stormur.py" || {
+  log "stormur scraper failed; continuing"
+}
+
 # 1) Build web data (fetches images, writes models.json)
 log "rebuilding web data..."
 "$ROOT/.venv/bin/python" "$ROOT/scripts/build_data.py"

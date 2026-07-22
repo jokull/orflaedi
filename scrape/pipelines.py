@@ -38,6 +38,14 @@ class DatabasePipeline(object):
         SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
         self.db = SessionLocal()
         self.retailer = get_or_create_retailer(self.db, slug=spider.name)
+        retailer_name = getattr(spider, "retailer_name", None)
+        retailer_website_url = getattr(spider, "retailer_website_url", None)
+        if retailer_name:
+            self.retailer.name = retailer_name
+        if retailer_website_url:
+            self.retailer.website_url = retailer_website_url
+        if retailer_name or retailer_website_url:
+            self.db.commit()
 
     def close_spider(self, spider):
         # we can deactivate these since they are no longer available

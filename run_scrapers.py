@@ -33,6 +33,8 @@ SPIDERS = {
     "everest": {"engine": "scrapy", "status": "working"},
     "hvellur": {"engine": "scrapy", "status": "working"},
     "rafmagnshjol": {"engine": "scrapy", "status": "working"},
+    "scb": {"engine": "scrapy", "status": "working"},
+    "unno": {"engine": "scrapy", "status": "working"},
     
     # JS-rendered sites - use Scrapling/Playwright
     "ellingsen": {"engine": "scrapling", "status": "working"},

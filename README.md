@@ -54,6 +54,8 @@ This project scrapes Icelandic e-bike retailer websites
 - elko.is
 - sensabikes.is
 - gastec.is
+- scb.is
+- unno.is
 
 **TODO**
 

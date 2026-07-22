@@ -23,6 +23,19 @@ ROOT=$(pwd)
 
 log() { echo "[$(date +%H:%M:%S)] $*"; }
 
+load_cloudflare_token() {
+  if [[ -n "${CLOUDFLARE_API_TOKEN:-}" ]]; then
+    return
+  fi
+  if command -v security > /dev/null 2>&1; then
+    CLOUDFLARE_API_TOKEN=$(security find-generic-password \
+      -a "$(id -un)" \
+      -s is.orflaedi.cloudflare-api-token \
+      -w 2> /dev/null || true)
+    export CLOUDFLARE_API_TOKEN
+  fi
+}
+
 # Wait for any running scrapers to finish — we don't want to classify
 # mid-scrape and miss half the new items.
 while docker compose -f /Users/jokull/mediaserver/docker-compose.yml \
@@ -62,6 +75,11 @@ cd "$ROOT/web"
 pnpm run build
 
 log "deploying to Cloudflare..."
+load_cloudflare_token
+if [[ -z "${CLOUDFLARE_API_TOKEN:-}" ]]; then
+  log "Cloudflare token missing from environment and login Keychain"
+  exit 1
+fi
 pnpm exec wrangler deploy
 
 log "done."

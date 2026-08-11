@@ -13,7 +13,6 @@ COPY requirements.txt .
 
 # Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
-RUN pip install scrapy==2.6.3 shub Twisted==22.10.0
 
 # Copy your Scrapy project
 COPY . /app/

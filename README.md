@@ -1,34 +1,30 @@
 # Development
 
-You will need pnpm, Poetry installed and Postgres running locally
+You will need pnpm and Postgres running locally.
+
+Web frontend (Astro, in `web/`):
 
 ```bash
-> pnpm
-> pnpm run watch
+> cd web
+> pnpm install
+> pnpm run dev
 ```
 
-In another tab
+The frontend is a static site built from `web/src/data/models.json`, which is
+generated from the Postgres database by `scripts/build_data.py`.
+
+Scrapers run in Docker (via the compose file in `mediaserver`):
 
 ```bash
-> poetry install
-> poetry run uvicorn orflaedi.main:app --reload
+> docker compose -f /Users/jokull/mediaserver/docker-compose.yml up -d orflaedi_scrapy
 ```
 
-Drop into a Fish shell in the Docker
+JS-heavy retailer sites that can't be scraped over plain HTTP (e.g. stormur.is)
+use host-side Scrapling/Playwright spiders in `scrape/scrapling_spiders/`,
+run with the repo venv:
 
 ```bash
-docker compose up --build -d
-docker exec -it db1eead29953 fish
-```
-
-Use something like this for black formating in a `.vscode/settings.json` file.
-
-```json
-{
-  "python.formatting.provider": "black",
-  "editor.formatOnSave": true,
-  "python.formatting.blackArgs": ["--line-length=100"]
-}
+> .venv/bin/python scrape/scrapling_spiders/stormur.py
 ```
 
 # Scrapers
@@ -88,19 +84,17 @@ name too. Could add a filter for that to the UI.
 
 # Deployment
 
-The project is hosted on Render on `www.orflaedi.is`. There is a Scrapy spider
-for each of the retailer websites that is run a few times a day.
+The site is hosted on Cloudflare Workers (`www.orflaedi.is`). Every hour a
+launchd agent (`com.orflaedi.update-and-deploy`) runs
+`bin/update-and-deploy.sh`, which:
 
-```bash
-> poetry export --without-hashes -f requirements.txt > requirements.txt
-> NODE_ENV=production yarn run build
-```
+1. waits for any running scrapers to finish
+2. runs the host-side Playwright spiders
+3. rebuilds `web/src/data/models.json` from Postgres (`scripts/build_data.py`)
+4. classifies new/untagged bikes with Claude (`scripts/classify.py`)
+5. rebuilds the data and runs the Astro build
+6. deploys to Cloudflare with `wrangler deploy`
 
-- Update the requirements.txt (we’re using Poetry which uses a proper lockfile,
-  but this is required for Render)
-- Run a production build (it will slim down tailwindcss)
-
-Next add a commit and push. It will autodeploy.
-
-Images are served via imgix proxy (all bike images are references to the
-external URL, never persisted locally).
+Scraper Python dependencies live in `requirements.txt` (installed by
+`Dockerfile.scrapy` and the Scrapy Cloud image via `scrapinghub.yml`). The
+legacy FastAPI/starlette web app was retired when the frontend moved to Astro.

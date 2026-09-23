@@ -28,6 +28,11 @@ START_URLS = [
     "https://ofsi.is/collections/rise-lt-fulldempad-rafmagnsfjallahjol",
     "https://ofsi.is/collections/wild-rafmagnsfjallahjol-eldri-argerd",
     "https://ofsi.is/collections/wild-fulldempad-rafmagnsfjallahjol",
+    "https://ofsi.is/collections/wild-lt-fulldempad-rafmagnsfjallahjol",
+    "https://ofsi.is/collections/wild-tr-fulldempad-rafmagnsfjallahjol",
+    "https://ofsi.is/collections/denna-rafmagnsmalarhjol",
+    "https://ofsi.is/collections/muga-fulldempad-rafmagnsborgarhjol",
+    "https://ofsi.is/collections/carpe-rafmagnsborgarhjol",
 ]
 
 # Delay between requests to avoid rate limiting

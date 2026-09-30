@@ -23,6 +23,17 @@ ROOT=$(pwd)
 
 log() { echo "[$(date +%H:%M:%S)] $*"; }
 
+# This checkout is the production source of truth. Refuse to deploy local,
+# uncommitted changes, then fast-forward so merged scraper changes are not
+# stranded until somebody updates the Mac manually.
+if [[ -n "$(git status --porcelain)" ]]; then
+  log "working tree is dirty; refusing automatic update/deploy"
+  exit 1
+fi
+log "updating source from origin/main..."
+git fetch --quiet origin main
+git merge --ff-only origin/main
+
 load_cloudflare_token() {
   if [[ -n "${CLOUDFLARE_API_TOKEN:-}" ]]; then
     return
@@ -50,6 +61,11 @@ done
 log "running stormur (Playwright)..."
 "$ROOT/.venv/bin/python" "$ROOT/scrape/scrapling_spiders/stormur.py" || {
   log "stormur scraper failed; continuing"
+}
+
+log "running ofsi (Playwright)..."
+"$ROOT/.venv/bin/python" "$ROOT/scrape/scrapling_spiders/ofsi.py" || {
+  log "ofsi scraper failed; continuing"
 }
 
 # 1) Build web data (fetches images, writes models.json)

@@ -270,13 +270,15 @@ async def backfill(
                 ),
             )
             .order_by(M.Model.id)
-            .limit(limit)
         )
         rows = db.execute(q).scalars().all()
 
+    # Filter by image before applying the limit: untagged imageless rows
+    # would otherwise fill the window and starve every later bike.
     image_map = load_image_map()
-    targets = [m for m in rows if m.id in image_map]
-    skipped_no_image = len(rows) - len(targets)
+    with_image = [m for m in rows if m.id in image_map]
+    skipped_no_image = len(rows) - len(with_image)
+    targets = with_image[:limit] if limit else with_image
     if not targets:
         print("No untagged bikes with images to classify.")
         return

@@ -51,3 +51,23 @@ def test_parse_products_skips_unavailable_or_incomplete_products():
     }
 
     assert list(parse_products(payload, make="UNNO", site_url="https://unno.is")) == []
+
+
+def test_parse_products_can_keep_sold_out_products():
+    payload = {
+        "products": [
+            {
+                "id": 7,
+                "title": "Longtail DUO",
+                "handle": "longtail-duo",
+                "variants": [{"price": "649900.00", "available": False}],
+                "images": [{"src": "https://cdn.example/duo.jpg"}],
+            }
+        ]
+    }
+
+    assert list(parse_products(payload, make="Tenways", site_url="https://t2.is")) == []
+    [item] = parse_products(
+        payload, make="Tenways", site_url="https://t2.is", include_unavailable=True
+    )
+    assert item["price"] == 649900

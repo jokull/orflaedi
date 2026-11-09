@@ -1,14 +1,17 @@
 """Helpers shared by Shopify-backed retailer spiders."""
 
 
-def parse_products(payload, *, make, site_url):
-    """Yield normalized bike items from a Shopify products response."""
+def parse_products(payload, *, make, site_url, include_unavailable=False):
+    """Yield normalized bike items from a Shopify products response.
+
+    include_unavailable keeps sold-out products (priced from all variants),
+    for shops that sell incoming stock as pre-orders while it shows sold out.
+    """
     for product in payload.get("products") or []:
-        available_variants = [
-            variant
-            for variant in product.get("variants") or []
-            if variant.get("available", True)
-        ]
+        variants = product.get("variants") or []
+        available_variants = [v for v in variants if v.get("available", True)]
+        if not available_variants and include_unavailable:
+            available_variants = variants
         prices = []
         for variant in available_variants:
             try:

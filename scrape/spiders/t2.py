@@ -19,6 +19,9 @@ class T2(scrapy.Spider):
             json.loads(response.text),
             make="Tenways",
             site_url=self.retailer_website_url,
+            # The Longtail DUO shows sold out while T2 takes pre-orders for
+            # the next batch (via a separate deposit product); keep listing it.
+            include_unavailable=True,
         ):
             if item["name"].upper().startswith("TENWAYS "):
                 item["name"] = item["name"][len("TENWAYS ") :]

@@ -1,30 +1,25 @@
+import json
+
 import scrapy
+
+from scrape.shopify import parse_products
 
 
 class T2(scrapy.Spider):
     name = "t2"
+    retailer_name = "T2"
+    retailer_website_url = "https://t2.is"
 
     start_urls = [
-        "https://t2.is/collections/e-bikes",
+        "https://t2.is/collections/e-bikes/products.json?limit=250",
     ]
 
     def parse(self, response):
-        for product in response.css("#product-grid .card__content a"):
-            yield response.follow(product, self.parse_product)
-
-    def parse_product(self, response):
-        name = response.css(".product__title h1::text").get()
-        if name.startswith("TENWAYS "):
-            name = name[len("TENWAYS "):]
-        price = int("".join(response.css(".price-item--regular::text").re(r"\d+")))
-        image_url = 'https:' + response.css(".product__media img::attr(src)").get()
-        sku = response.url
-
-        yield {
-            "sku": sku,
-            "name": name,
-            "make": "Tenways",
-            "price": price,
-            "file_urls": [image_url],
-            "scrape_url": response.url,
-        }
+        for item in parse_products(
+            json.loads(response.text),
+            make="Tenways",
+            site_url=self.retailer_website_url,
+        ):
+            if item["name"].upper().startswith("TENWAYS "):
+                item["name"] = item["name"][len("TENWAYS ") :]
+            yield item

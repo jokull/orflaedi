@@ -48,11 +48,30 @@ class DatabasePipeline(object):
             self.db.commit()
 
     def close_spider(self, spider):
-        # we can deactivate these since they are no longer available
-        if not getattr(spider, "skip", False) and self.scraped_skus.__len__() > 0:
+        stats = spider.crawler.stats.get_stats()
+        failed_requests = (
+            stats.get("retry/max_reached", 0)
+            + stats.get("downloader/exception_count", 0)
+            + stats.get("spider_exceptions/count", 0)
+        )
+
+        # Only treat absence from a complete scrape as evidence that a product
+        # disappeared. A partial crawl (especially a Shopify 429) must not
+        # deactivate the rest of a retailer's inventory.
+        if (
+            not getattr(spider, "skip", False)
+            and self.scraped_skus
+            and failed_requests == 0
+        ):
             self.db.query(Model).filter(
                 ~Model.sku.in_(self.scraped_skus), Model.retailer == self.retailer
             ).update({"active": False}, synchronize_session=False)
+        elif failed_requests:
+            logging.warning(
+                "Skipping deactivation for %s: incomplete crawl (%s failed requests)",
+                spider.name,
+                failed_requests,
+            )
         self.db.commit()
         self.db.close()
 

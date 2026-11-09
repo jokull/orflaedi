@@ -21,4 +21,4 @@ COPY . /app/
 WORKDIR /app/
 
 # Run cron and tail the log file to output logs to Docker
-CMD ["sh", "-c", "while true; do echo \"Starting scraping session at: $(date)\"; cd /app && /usr/local/bin/scrapy list | xargs -n 1 /usr/local/bin/scrapy crawl; sleep 3600; done"]
+CMD ["sh", "-c", "while true; do echo \"Starting scraping session at: $(date)\"; cd /app && /usr/local/bin/scrapy list | xargs -n 1 /usr/local/bin/scrapy crawl; sleep 21600; done"]

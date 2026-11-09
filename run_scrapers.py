@@ -50,7 +50,7 @@ SPIDERS = {
     "kuldi": {"engine": "scrapling", "status": "todo"},
     "sensa": {"engine": "scrapling", "status": "todo"},
     "skidathjonustan": {"engine": "scrapling", "status": "todo"},
-    "t2": {"engine": "scrapling", "status": "todo"},
+    "t2": {"engine": "scrapy", "status": "working"},
     "thruman": {"engine": "scrapling", "status": "todo"},
 }
 

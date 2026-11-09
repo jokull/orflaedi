@@ -56,16 +56,18 @@ while docker compose -f /Users/jokull/mediaserver/docker-compose.yml \
 done
 
 # 0) Run host-side Playwright spiders (stormur.is 403s plain HTTP, so it can't
-#    live in the Docker-based scrapy runner). Soft-fail so a broken spider
+#    live in the Docker-based scrapy runner). Ofsi is scraped by the Docker
+#    runner via Shopify products.json. Soft-fail so a broken spider
 #    doesn't block deploy.
+# Browsers live in ~/Library/Caches/ms-playwright, which cache cleaners wipe.
+# Installing is a no-op when the pinned build is already present.
+"$ROOT/.venv/bin/python" -m playwright install chromium > /dev/null || {
+  log "playwright browser install failed; continuing"
+}
+
 log "running stormur (Playwright)..."
 "$ROOT/.venv/bin/python" "$ROOT/scrape/scrapling_spiders/stormur.py" || {
   log "stormur scraper failed; continuing"
-}
-
-log "running ofsi (Playwright)..."
-"$ROOT/.venv/bin/python" "$ROOT/scrape/scrapling_spiders/ofsi.py" || {
-  log "ofsi scraper failed; continuing"
 }
 
 # 1) Build web data (fetches images, writes models.json)

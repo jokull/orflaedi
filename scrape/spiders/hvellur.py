@@ -18,7 +18,9 @@ class HvellurSpider(scrapy.Spider):
     def parse_product(self, response, price):
 
         sku = response.css(".single-product-page::attr('id')").re(r"product-(\d+)")[0]
-        make, name = response.css(".product_title::text").get().split(" ", 1)
+        # The title node has leading newlines/tabs; normalise before splitting.
+        title = " ".join("".join(response.css(".product_title ::text").getall()).split())
+        make, name = title.split(" ", 1)
 
         stripwords = [
             "svart",

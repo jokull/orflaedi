@@ -1,6 +1,14 @@
 import scrapy
 
 
+# The first gallery image of some QWIC products carries a German test-award
+# badge ("BEST GETEST", "beste koop"). Pin a clean side-on cutout instead.
+IMAGE_OVERRIDES = {
+    "inter-tour": "https://rafmagnshjol.is/wp-content/uploads/2020/01/2019_cutout_premium-i_mn7belt_female_matte-black.jpg",
+    "atlas-tour": "https://rafmagnshjol.is/wp-content/uploads/2025/08/1.ATLAS-TOUR.jpg",
+}
+
+
 class RafmagnshjolSpider(scrapy.Spider):
     name = "rafmagnshjol"
 
@@ -28,7 +36,8 @@ class RafmagnshjolSpider(scrapy.Spider):
             "make": "QWIC",
             "price": price,
             "file_urls": [
-                response.css(".woocommerce-product-gallery__image img::attr('data-src')")[0].get()
+                IMAGE_OVERRIDES.get(sku)
+                or response.css(".woocommerce-product-gallery__image img::attr('data-src')")[0].get()
             ],
             "scrape_url": response.url,
         }

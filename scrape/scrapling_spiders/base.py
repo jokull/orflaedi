@@ -37,6 +37,9 @@ class ScraplingPipeline:
         self.scraped_skus = set()
         self.db = None
         self.retailer = None
+        # Set by a spider when part of the crawl failed. A partial scrape must
+        # not deactivate products it simply didn't reach.
+        self.incomplete = False
     
     def open(self):
         if self.dry_run:
@@ -108,7 +111,9 @@ class ScraplingPipeline:
             print(f"[DRY RUN] Would deactivate models not in {len(self.scraped_skus)} scraped SKUs")
             return
         
-        if self.db and self.scraped_skus:
+        if self.db and self.incomplete:
+            print("Skipping deactivation: incomplete scrape")
+        elif self.db and self.scraped_skus:
             # Deactivate models not found in this scrape
             deactivated = self.db.query(Model).filter(
                 ~Model.sku.in_(self.scraped_skus),

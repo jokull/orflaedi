@@ -28,6 +28,9 @@ START_URLS = [
 # against weirdness. Kids e-bikes can go below 100k on sale.
 MIN_PRICE = 50_000
 
+# Card badges that precede the product name ("Til á Lager", "-15%", ...).
+BADGE_RE = re.compile(r"^(til á lager|uppselt|forpönt|væntanlegt|nýtt|tilboð|-?\d+\s*%)", re.I)
+
 
 def _highest_res(srcset: str | None) -> str | None:
     if not srcset:
@@ -48,8 +51,12 @@ def _highest_res(srcset: str | None) -> str | None:
 
 
 def scrape_category(page, url: str) -> list[dict]:
-    page.goto(url, timeout=60000)
-    page.wait_for_load_state("networkidle", timeout=45000)
+    # Don't wait for "networkidle": stormur.is keeps analytics/chat sockets
+    # open, so it routinely never goes idle. Wait for product cards instead.
+    page.goto(url, timeout=60000, wait_until="domcontentloaded")
+    page.wait_for_selector('a[href*="/vorur/"]', timeout=45000)
+    # Let lazy images resolve their srcset before reading cards.
+    page.wait_for_timeout(1500)
 
     cards = page.eval_on_selector_all(
         'a[href*="/vorur/"]',
@@ -84,7 +91,11 @@ def scrape_category(page, url: str) -> list[dict]:
         if not text or "kr" not in text:
             continue
 
-        lines = [l.strip() for l in text.splitlines() if l.strip()]
+        lines = [
+            l.strip()
+            for l in text.splitlines()
+            if l.strip() and not BADGE_RE.search(l.strip())
+        ]
         # Format: NAME / MAKE / PRICE kr. / [size variants...]
         if len(lines) < 3:
             continue
@@ -149,7 +160,13 @@ def run(dry_run: bool = False):
         browser = p.chromium.launch(headless=True)
         page = browser.new_page()
         for url in START_URLS:
-            for item in scrape_category(page, url):
+            try:
+                category_items = scrape_category(page, url)
+            except Exception as exc:  # noqa: BLE001 - keep other categories
+                print(f"  ! {url} failed: {exc}")
+                pipeline.incomplete = True
+                continue
+            for item in category_items:
                 if item["sku"] in seen_skus:
                     continue
                 seen_skus.add(item["sku"])
@@ -161,6 +178,8 @@ def run(dry_run: bool = False):
         pipeline.process_item(item)
 
     pipeline.close()
+    if pipeline.incomplete:
+        print("\nWarning: some categories failed; kept existing inventory active")
     print(f"\nDone! Scraped {len(all_items)} e-bikes from {SPIDER_NAME}")
     return all_items
 

@@ -70,6 +70,13 @@ log "running stormur (Playwright)..."
   log "stormur scraper failed; continuing"
 }
 
+# Shopify shops throttle non-browser clients from this IP, so their spiders
+# run through headless Chromium here instead of in the Docker runner.
+log "running Shopify spiders (browser)..."
+"$ROOT/.venv/bin/python" "$ROOT/scrape/browser_crawl.py" || {
+  log "browser crawl had failures; continuing"
+}
+
 # 1) Build web data (fetches images, writes models.json)
 log "rebuilding web data..."
 "$ROOT/.venv/bin/python" "$ROOT/scripts/build_data.py"

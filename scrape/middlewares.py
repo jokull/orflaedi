@@ -58,3 +58,23 @@ def _parse_retry_after(value):
         return float(value.decode() if isinstance(value, bytes) else value)
     except ValueError:
         return None
+
+
+class BrowserOnlyMiddleware:
+    """Skip spiders that scrape/browser_crawl.py runs through Chromium.
+
+    `scrapy crawl <name>` still works for local debugging with
+    ORFLAEDI_ALLOW_SCRAPY=1. spider.skip stops the pipeline from treating the
+    empty crawl as "everything sold out".
+    """
+
+    def process_start_requests(self, start_requests, spider):
+        import os
+
+        from scrape.spider_lists import BROWSER_SPIDERS
+
+        if spider.name in BROWSER_SPIDERS and not os.environ.get("ORFLAEDI_ALLOW_SCRAPY"):
+            spider.skip = True
+            logger.warning("%s runs via scrape/browser_crawl.py; skipping", spider.name)
+            return []
+        return start_requests

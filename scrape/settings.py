@@ -34,6 +34,9 @@ DOWNLOADER_MIDDLEWARES = {
     # Runs before RetryMiddleware (550) on responses.
     "scrape.middlewares.TooManyRequestsBackoffMiddleware": 560,
 }
+SPIDER_MIDDLEWARES = {
+    "scrape.middlewares.BrowserOnlyMiddleware": 10,
+}
 BACKOFF_429_RETRY_TIMES = 8
 BACKOFF_429_MAX_DELAY = 60
 # Shopify throttles Twisted's TLS fingerprint; fetch HTTPS through urllib.

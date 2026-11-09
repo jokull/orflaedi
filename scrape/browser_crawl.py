@@ -21,6 +21,7 @@ import base64
 import os
 import sys
 import time
+import warnings
 from collections import deque
 from urllib.parse import urlsplit
 
@@ -34,6 +35,10 @@ from scrapy.spiderloader import SpiderLoader  # noqa: E402
 from scrapy.utils.project import get_project_settings  # noqa: E402
 
 from scrape.spider_lists import BROWSER_SPIDERS  # noqa: E402
+
+# start_requests() is deprecated in Scrapy 2.13+ but is what the Docker
+# image's Scrapy 2.6 understands, so the spiders keep using it.
+warnings.filterwarnings("ignore", message=r".*start_requests\(\) method is deprecated.*")
 
 REQUEST_DELAY = 1.0  # seconds between requests to the same shop
 RETRY_WAITS = (15, 45, 90)  # back-off on 429/5xx

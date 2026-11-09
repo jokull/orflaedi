@@ -76,8 +76,10 @@ def scrape_category(page, url: str) -> list[dict]:
             out.push({
               href: e.href,
               text: cur ? cur.innerText : '',
-              imgSrc: img ? img.src : null,
-              imgSrcset: img ? img.srcset : null,
+              // perfmatters lazy-loads below-the-fold cards: the real URLs
+              // sit in data-src/data-srcset until scrolled into view.
+              imgSrc: img ? (img.dataset.src || img.src) : null,
+              imgSrcset: img ? (img.dataset.srcset || img.srcset) : null,
             });
           }
           return out;

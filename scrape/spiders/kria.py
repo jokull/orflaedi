@@ -25,7 +25,12 @@ class KriaSpider(scrapy.Spider):
         if price < 30_000:
             return
 
-        image_url = response.css(".item_slick::attr(href)").get()
+        # Theme moved from a slick slider to .product-gallery-main; the first
+        # item is Specialized's side-on "HERO" shot. og:image is the same file.
+        image_url = (
+            response.css(".product-gallery-main-item img::attr(src)").get()
+            or response.xpath("//meta[@property='og:image']/@content").get()
+        )
         sku = response.xpath("//meta[@property='og:url']").css("::attr(content)").get()
 
         yield {

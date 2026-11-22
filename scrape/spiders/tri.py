@@ -4,6 +4,16 @@ import scrapy
 
 from scrapy.http import JsonRequest
 
+
+def large_image_url(image_url):
+    """Return Tri's large image URL without duplicating the size suffix."""
+    filename, ext = os.path.splitext(image_url)
+    if filename.endswith("_thumbnail"):
+        filename = filename[: -len("_thumbnail")]
+    if not filename.endswith("_large"):
+        filename += "_large"
+    return f"{filename}{ext}"
+
 """
 curl 'https://tri.is/api/Item/' \
 -X 'POST' \
@@ -69,15 +79,7 @@ class TriSpider(scrapy.Spider):
             if image_url == "https://tri.is/images/":
                 image_url = response.urljoin(product['thumbNailUrl'])
 
-            # Insert "_large" before the file extension
-            filename, ext = os.path.splitext(image_url)
-
-            if filename.endswith("_thumbnail"):
-                filename, _ = filename.rsplit("_", 1)
-
-            # Optional check to avoid double-adding '_large'
-            # if "_large" not in filename:
-            image_url_large = f"{filename}_large{ext}"
+            image_url_large = large_image_url(image_url)
 
             url = response.urljoin(f"/vara/{product['slug']}")
 
